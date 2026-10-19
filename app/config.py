@@ -12,3 +12,6 @@ class Settings(BaseSettings):
     min_gap_minutes: int = 30
     min_overlap_minutes: int = 30
     timezone: str = "America/Los_Angeles"
+
+
+settings = Settings()
