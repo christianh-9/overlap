@@ -2,7 +2,6 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app import models
 from app.db import Base, SessionLocal, engine
 from app.routers import auth, profiles
 from app.seed import seed_campuses

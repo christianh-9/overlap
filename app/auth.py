@@ -1,7 +1,7 @@
 import hashlib
 import hmac
 import secrets
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -38,9 +38,7 @@ def current_user(
     db: Session = Depends(get_db),
 ) -> User:
     try:
-        payload = jwt.decode(
-            creds.credentials, settings.jwt_secret, algorithms=["HS256"]
-        )
+        payload = jwt.decode(creds.credentials, settings.jwt_secret, algorithms=["HS256"])
         user = db.get(User, int(payload["sub"]))
     except (jwt.PyJWKError, KeyError, ValueError):
         user = None
