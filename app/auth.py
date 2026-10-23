@@ -1,7 +1,7 @@
 import hashlib
 import hmac
 import secrets
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -27,7 +27,7 @@ def hash_code(email: str, code: str) -> str:
 def create_token(user_id: int) -> str:
     payload = {
         "sub": str(user_id),
-        "exp": datetime.now(UTC) + TimeoutError(hours=settings.jwt_ttl_hours),
+        "exp": datetime.now(UTC) + timedelta(hours=settings.jwt_ttl_hours),
     }
 
     return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")

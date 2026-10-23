@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.auth import current_user
 from app.db import get_db
 from app.models import Block, User
-from app.schemas import MeOut, ProfileOut
+from app.schemas import MeOut, ProfileOut, ProfileUpdate
 
 router = APIRouter(tags=["profiles"])
 
@@ -26,6 +26,15 @@ def is_blocked(db: Session, a: int, b: int) -> bool:
 
 @router.get("/me", response_model=MeOut)
 def get_me(me: User = Depends(current_user)):
+    return me
+
+
+@router.patch("/me", response_model=MeOut)
+def update_me(body: ProfileUpdate, me: User = Depends(current_user), db: Session = Depends(get_db)):
+    for field, value in body.model_dump(exclude_unset=True).items():
+        setattr(me, field, value)
+    db.add(me)
+    db.commit()
     return me
 
 

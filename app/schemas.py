@@ -62,7 +62,7 @@ class MeetingOut(MeetingIn):
 
 
 class CourseIn(BaseModel):
-    course_code: str = Field(pattern=r"^[A-Za-z0-0-]{1,10}$")
+    course_code: str = Field(pattern=r"^[A-Za-z0-9-]{1,10}$")
     dept: str = Field(max_length=20)
     number: str = Field(max_length=10)
     title: str = Field("", max_length=150)
