@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.db import Base, SessionLocal, engine
-from app.routers import auth, profiles
+from app.routers import auth, matches, profiles, schedule
 from app.seed import seed_campuses
 
 
@@ -18,6 +18,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Overlap", lifespan=lifespan)
 app.include_router(auth.router)
 app.include_router(profiles.router)
+app.include_router(schedule.router)
+app.include_router(matches.router)
 
 
 @app.get("/health")
