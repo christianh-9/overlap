@@ -1,14 +1,24 @@
+from collections.abc import Callable
+from dataclasses import asdict
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.anteater import CourseNotFound, SectionData, SourceUnavailable, fetch_section
 from app.auth import current_user
 from app.config import settings
 from app.db import get_db
 from app.models import Course, Enrollment, Meeting, User
-from app.schemas import CourseIn, CourseOut
+from app.schemas import CourseAdd, CourseOut
 
 router = APIRouter(prefix="/schedule", tags=["schedule"])
+
+Fetcher = Callable[[str, str], SectionData]
+
+
+def get_fetcher() -> Fetcher:
+    return fetch_section
 
 
 @router.get("", response_model=list[CourseOut])
@@ -22,7 +32,12 @@ def my_schedule(me: User = Depends(current_user), db: Session = Depends(get_db))
 
 
 @router.post("/courses", response_model=CourseOut, status_code=201)
-def add_course(body: CourseIn, me: User = Depends(current_user), db: Session = Depends(get_db)):
+def add_course(
+    body: CourseAdd,
+    me: User = Depends(current_user),
+    db: Session = Depends(get_db),
+    fetch: Fetcher = Depends(get_fetcher),
+):
     course = db.scalar(
         select(Course).where(
             Course.campus_id == me.campus_id,
@@ -32,14 +47,20 @@ def add_course(body: CourseIn, me: User = Depends(current_user), db: Session = D
     )
 
     if course is None:
+        try:
+            section = fetch(settings.current_term, body.course_code)
+        except CourseNotFound:
+            raise HTTPException(404, f"No section {body.course_code} this term") from None
+        except SourceUnavailable:
+            raise HTTPException(502, "UCI schedule unavailable, try again") from None
         course = Course(
             campus_id=me.campus_id,
             term=settings.current_term,
             course_code=body.course_code,
-            dept=body.dept.upper(),
-            number=body.number.upper(),
-            title=body.title,
-            meetings=[Meeting(**m.model_dump()) for m in body.meetings],
+            dept=section.dept,
+            number=section.number,
+            title=section.title,
+            meetings=[Meeting(**asdict(m)) for m in section.meetings],
         )
 
         db.add(course)
