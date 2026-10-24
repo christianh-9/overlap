@@ -1,6 +1,6 @@
 from datetime import time
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class CodeRequest(BaseModel):
@@ -44,29 +44,17 @@ class ProfileUpdate(BaseModel):
     bio: str | None = Field(None, max_length=500)
 
 
-class MeetingIn(BaseModel):
-    weekday: int = Field(ge=0, le=6)
-    start_time: time
-    end_time: time
-    location: str | None = Field(None, max_length=100)
-
-    @model_validator(mode="after")
-    def end_after_start(self):
-        if self.end_time <= self.start_time:
-            raise ValueError("end_time must be after start_time")
-        return self
+class CourseAdd(BaseModel):
+    course_code: str = Field(pattern=r"^\d{5}$")
 
 
-class MeetingOut(MeetingIn):
+class MeetingOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-
-class CourseIn(BaseModel):
-    course_code: str = Field(pattern=r"^[A-Za-z0-9-]{1,10}$")
-    dept: str = Field(max_length=20)
-    number: str = Field(max_length=10)
-    title: str = Field("", max_length=150)
-    meetings: list[MeetingIn] = Field(min_length=1)
+    weekday: int
+    start_time: time
+    end_time: time
+    location: str | None
 
 
 class CourseOut(BaseModel):

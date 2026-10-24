@@ -40,16 +40,17 @@ def test_full_flow(client, login):
         assert client.patch("/me", headers=headers, json=body).status_code == 200
 
     schedules = [
-        (alice, course("34000", "ICS", "46", ("09:00", "10:00"))),
-        (alice, course("44000", "STATS", "67", ("13:00", "14:00"))),
-        (bob, course("34000", "ICS", "46", ("09:00", "10:00"))),
-        (bob, course("50000", "MATH", "3A", ("12:00", "12:50"))),
-        (carol, course("60000", "BIO", "93", ("08:00", "11:00"))),
-        (carol, course("61000", "CHEM", "1A", ("11:20", "13:30"))),
+        (alice, "34000"),
+        (alice, "44000"),
+        (bob, "34000"),
+        (bob, "50000"),
+        (carol, "60000"),
+        (carol, "61000"),
     ]
 
-    for headers, body in schedules:
-        assert client.post("/schedule/courses", headers=headers, json=body).status_code == 201
+    for headers, code in schedules:
+        r = client.post("/schedule/courses", headers=headers, json={"course_code": code})
+        assert r.status_code == 201
 
     r = client.get("/matches?weekday=0", headers=alice)
     assert r.status_code == 200
@@ -65,3 +66,9 @@ def test_full_flow(client, login):
     assert client.post(f"/users/{bob_id}/block", headers=alice).status_code == 204
     assert client.get("/matches?weekday=0", headers=alice).json() == []
     assert client.get("/matches?weekday=0", headers=bob).json() == []
+
+
+def test_unkown_section_404(client, login):
+    alice = login("alice@uci.edu")
+    r = client.post("/schedule/courses", headers=alice, json={"course_code": "99999"})
+    assert r.status_code == 404
