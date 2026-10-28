@@ -103,3 +103,29 @@ class Block(Base):
     blocked_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
+
+
+class Activity(Base):
+    __tablename__ = "activities"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    campus_id: Mapped[int] = mapped_column(ForeignKey("campuses.id"), index=True)
+    creator_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    title: Mapped[str] = mapped_column(String(100))
+    location: Mapped[str] = mapped_column(String(100))
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    max_size: Mapped[int] = mapped_column(SmallInteger)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    creator: Mapped[User] = relationship()
+
+
+class ActivityMember(Base):
+    __tablename__ = "activity_members"
+
+    activity_id: Mapped[int] = mapped_column(
+        ForeignKey("activities.id", ondelete="CASCADE"), primary_key=True
+    )
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )

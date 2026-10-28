@@ -1,6 +1,6 @@
-from datetime import time
+from datetime import datetime, time
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr, Field
 
 
 class CodeRequest(BaseModel):
@@ -76,3 +76,21 @@ class MatchOut(BaseModel):
     shared_courses: int
     same_major: bool
     same_transfer_school: bool
+
+
+class ActivityIn(BaseModel):
+    title: str = Field(min_length=1, max_length=100)
+    location: str = Field(min_length=1, max_length=100)
+    starts_at: AwareDatetime
+    max_size: int = Field(ge=2, le=20)
+
+
+class ActivityOut(BaseModel):
+    id: int
+    title: str
+    location: str
+    starts_at: datetime
+    max_size: int
+    creator: ProfileOut
+    member_count: int
+    joined: bool
