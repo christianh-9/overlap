@@ -32,6 +32,7 @@ class ProfileOut(BaseModel):
 class MeOut(ProfileOut):
     email: str
     home_city: str | None
+    contact: str | None
 
 
 class ProfileUpdate(BaseModel):
@@ -41,6 +42,7 @@ class ProfileUpdate(BaseModel):
     is_transfer: bool | None = None
     transfer_from: str | None = Field(None, max_length=100)
     home_city: str | None = Field(None, max_length=100)
+    contact: str | None = Field(None, max_length=100)
     bio: str | None = Field(None, max_length=500)
 
 
@@ -94,3 +96,12 @@ class ActivityOut(BaseModel):
     creator: ProfileOut
     member_count: int
     joined: bool
+
+
+class WaveResult(BaseModel):
+    mutual: bool
+
+
+class ConnectionOut(BaseModel):
+    profile: ProfileOut
+    contact: str | None
