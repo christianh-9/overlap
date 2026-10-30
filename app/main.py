@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.db import Base, SessionLocal, engine
-from app.routers import activities, auth, matches, profiles, schedule, waves
+from app.routers import activities, admin, auth, matches, profiles, schedule, waves
 from app.seed import seed_campuses
 
 
@@ -22,6 +22,7 @@ app.include_router(schedule.router)
 app.include_router(matches.router)
 app.include_router(activities.router)
 app.include_router(waves.router)
+app.include_router(admin.router)
 
 
 @app.get("/health")

@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 
 from app.auth import current_user
 from app.db import get_db
-from app.models import Block, User
-from app.schemas import MeOut, ProfileOut, ProfileUpdate
+from app.models import Block, User, Report
+from app.schemas import MeOut, ProfileOut, ProfileUpdate, ReportIn
 
 router = APIRouter(tags=["profiles"])
 
@@ -38,7 +38,7 @@ def update_me(body: ProfileUpdate, me: User = Depends(current_user), db: Session
     return me
 
 
-@router.patch("/users/{user_id}", response_model=ProfileOut)
+@router.get("/users/{user_id}", response_model=ProfileOut)
 def get_user(user_id: int, me: User = Depends(current_user), db: Session = Depends(get_db)):
     user = db.get(User, user_id)
     if user is None or user.campus_id != me.campus_id or is_blocked(db, me.id, user_id):
@@ -53,3 +53,25 @@ def block_user(user_id: int, me: User = Depends(current_user), db: Session = Dep
     if db.get(Block, (me.id, user_id)) is None:
         db.add(Block(blocker_id=me.id, blocked_id=user_id))
         db.commit()
+
+
+@router.post("/users/{user_id}/report", status_code=201)
+def report_user(
+    user_id: int, body: ReportIn, me: User = Depends(current_user), db: Session = Depends(get_db)
+):
+    user = db.get(User, user_id)
+    if user is None or user.id == me.id or user.campus_id != me.campus_id:
+        raise HTTPException(404, "User not found")
+    db.add(
+        Report(
+            reporter_id=me.id,
+            reported_id=user.id,
+            reported_email=user.email,
+            reason=body.reason,
+            details=body.details,
+        )
+    )
+    if body.block and db.get(Block, (me.id, user_id)) is None:
+        db.add(Block(blocker_id=me.id, blocked_id=user_id))
+    db.commit()
+    return {"reported": True}

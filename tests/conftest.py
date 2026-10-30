@@ -2,6 +2,7 @@ import os
 
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 os.environ["DEV_MODE"] = "true"
+os.environ["ADMIN_EMAILS"] = '["admin@uci.edu"]'
 
 from datetime import time
 

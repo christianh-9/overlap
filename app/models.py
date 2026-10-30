@@ -144,3 +144,26 @@ class Wave(Base):
     )
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Report(Base):
+    __tablename__ = "reports"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    reporter_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    reported_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), index=True
+    )
+
+    reported_email: Mapped[str] = mapped_column(String(254))
+    reason: Mapped[str] = mapped_column(String(20))
+    details: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(20), default="open", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class BannedEmail(Base):
+    __tablename__ = "banned_emails"
+
+    email: Mapped[str] = mapped_column(String(254), primary_key=True)
+    banned_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

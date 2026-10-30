@@ -1,4 +1,5 @@
 from datetime import datetime, time
+from typing import Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr, Field
 
@@ -105,3 +106,29 @@ class WaveResult(BaseModel):
 class ConnectionOut(BaseModel):
     profile: ProfileOut
     contact: str | None
+
+
+ReportReason = Literal["harassment", "spam", "fake_profile", "inappropriate", "other"]
+
+
+class ReportIn(BaseModel):
+    reason: ReportReason
+    details: str = Field("", max_length=1000)
+    block: bool = True
+
+
+class ReportOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    reporter_id: int | None
+    reported_id: int | None
+    reported_email: str
+    reason: str
+    details: str
+    status: str
+    created_at: datetime
+
+
+class ResolveIn(BaseModel):
+    action: Literal["dismiss", "ban"]
