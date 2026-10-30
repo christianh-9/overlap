@@ -38,6 +38,7 @@ class User(Base):
     is_transfer: Mapped[bool] = mapped_column(Boolean, default=False)
     transfer_from: Mapped[str | None] = mapped_column(String(100))
     home_city: Mapped[str | None] = mapped_column(String(100))
+    contact: Mapped[str | None] = mapped_column(String(100))
     bio: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     campus: Mapped[Campus] = relationship()
@@ -129,3 +130,17 @@ class ActivityMember(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
+
+
+class Wave(Base):
+    __tablename__ = "waves"
+
+    sender_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+
+    recipient_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
