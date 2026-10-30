@@ -1,12 +1,13 @@
 from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.auth import current_user
+from app.blocking import blocked_ids
 from app.db import get_db
-from app.models import Activity, ActivityMember, Block, User
+from app.models import Activity, ActivityMember, User
 from app.schemas import ActivityIn, ActivityOut, ProfileOut
 
 router = APIRouter(prefix="/activities", tags=["activities"])
@@ -16,16 +17,6 @@ MAX_DAYS_AHEAD = 7
 
 def utc(dt: datetime) -> datetime:
     return dt.replace(tzinfo=UTC) if dt.tzinfo is None else dt.astimezone(UTC)
-
-
-def blocked_ids(db: Session, me: User):
-    rows = db.execute(
-        select(Block.blocker_id, Block.blocked_id).where(
-            or_(Block.blocker_id == me.id, Block.blocked_id == me.id)
-        )
-    )
-
-    return {other for pair in rows for other in pair if other != me.id}
 
 
 def to_out(activity: Activity, member_count: int, joined: bool) -> ActivityOut:
