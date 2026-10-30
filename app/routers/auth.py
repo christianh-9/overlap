@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.auth import create_token, hash_code, new_code
 from app.config import settings
 from app.db import get_db
-from app.models import Campus, LoginCode, User
+from app.models import BannedEmail, Campus, LoginCode, User
 from app.schemas import CodeRequest, CodeVerify, Token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -24,7 +24,11 @@ def campus_for(email: str, db: Session) -> Campus:
 @router.post("/request-code")
 def request_code(body: CodeRequest, db: Session = Depends(get_db)):
     email = body.email.lower()
+
     campus_for(email, db)
+
+    if db.get(BannedEmail, email) is not None:
+        raise HTTPException(403, "This account has been suspended")
     code = new_code()
 
     db.add(

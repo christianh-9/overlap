@@ -2,6 +2,8 @@ import os
 
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 os.environ["DEV_MODE"] = "true"
+os.environ["ADMIN_EMAILS"] = '["admin@uci.edu"]'
+os.environ["JWT_SECRET"] = "test-secret-that-is-at-least-32-bytes-long"
 
 from datetime import time
 
