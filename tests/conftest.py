@@ -43,6 +43,7 @@ def fake_fetch(term: str, code: str) -> SectionData:
 @pytest.fixture
 def client():
     Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
     app.dependency_overrides[get_fetcher] = lambda: fake_fetch
     with TestClient(app) as c:
         yield c
