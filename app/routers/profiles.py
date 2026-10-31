@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.auth import current_user
 from app.db import get_db
-from app.models import Block, User, Report
+from app.models import Block, Report, User
 from app.schemas import MeOut, ProfileOut, ProfileUpdate, ReportIn
 
 router = APIRouter(tags=["profiles"])

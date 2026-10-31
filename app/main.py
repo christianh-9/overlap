@@ -2,14 +2,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.db import Base, SessionLocal, engine
+from app.db import SessionLocal
 from app.routers import activities, admin, auth, matches, profiles, schedule, waves
 from app.seed import seed_campuses
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(engine)
     with SessionLocal() as db:
         seed_campuses(db)
     yield
