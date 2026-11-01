@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     min_overlap_minutes: int = 30
     timezone: str = "America/Los_Angeles"
     admin_emails: list[str] = []
+    resend_api_key: str = ""
+    email_from: str = "Overlap <onboarding@resend.dev"
 
 
 settings = Settings()
