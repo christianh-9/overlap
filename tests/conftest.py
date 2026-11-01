@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 
 from app.anteater import CourseNotFound, MeetingData, SectionData
 from app.db import Base, engine
+from app.email import get_mailer
 from app.main import app
 from app.routers.schedule import get_fetcher
 
@@ -41,10 +42,16 @@ def fake_fetch(term: str, code: str) -> SectionData:
 
 
 @pytest.fixture
-def client():
+def outbox():
+    return []
+
+
+@pytest.fixture
+def client(outbox):
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     app.dependency_overrides[get_fetcher] = lambda: fake_fetch
+    app.dependency_overrides[get_mailer] = lambda: lambda to, code: outbox.append((to, code))
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
