@@ -45,7 +45,7 @@ class User(Base):
 
 
 class LoginCode(Base):
-    __tablename__ = "login_code"
+    __tablename__ = "login_codes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(254), index=True)
