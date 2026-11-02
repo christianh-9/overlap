@@ -5,6 +5,9 @@ from fastapi import FastAPI
 from app.db import SessionLocal
 from app.routers import activities, admin, auth, matches, profiles, schedule, waves
 from app.seed import seed_campuses
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.config import settings
 
 
 @asynccontextmanager
@@ -15,6 +18,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Overlap", lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware, allow_origins=settings.cors_origin, allow_methods=["*"], allow_headers=["*"]
+)
 app.include_router(auth.router)
 app.include_router(profiles.router)
 app.include_router(schedule.router)

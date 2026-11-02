@@ -1,4 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator, model_validator
+
+DEV_SECRET = "dev-only-secret-not-for-production-use"
 
 
 class Settings(BaseSettings):
@@ -15,6 +18,28 @@ class Settings(BaseSettings):
     admin_emails: list[str] = []
     resend_api_key: str = ""
     email_from: str = "Overlap <onboarding@resend.dev"
+
+    cors_origin: list[str] = ["https://localhost:5173"]
+
+    @field_validator("database_url")
+    @classmethod
+    def use_psycopg_driver(cls, url: str) -> str:
+        for prefix in ("postgres://", "postgresql://"):
+            if url.startswith(prefix):
+                return "postgresql+psycopg://" + url.removeprefix(prefix)
+
+        return url
+
+    @model_validator(mode="after")
+    def check_production(self):
+        if self.dev_mode:
+            return self
+        if self.jwt_secret == DEV_SECRET or len(self.jwt_secret) < 32:
+            raise ValueError("Set JWT_SECRET to a random string of 32+ characters")
+        if not self.resend_api_key:
+            raise ValueError("Set RESEND_API_KEY so login codes can be emailed")
+
+        return self
 
 
 settings = Settings()
