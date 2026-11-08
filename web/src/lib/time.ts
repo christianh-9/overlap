@@ -30,6 +30,26 @@ export function weekdayOf(date: Date) {
   return (date.getDay() + 6) % 7
 }
 
+export function minutesOf(date: Date) {
+  return date.getHours() * 60 + date.getMinutes()
+}
+
+// "2026-11-11" in local time, the format date inputs use.
+export function dateInputValue(date: Date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${month}-${day}`
+}
+
+// "Today", "Tomorrow", or "Wednesday, Nov 11", by calendar day in local time.
+export function dayHeading(date: Date, now: Date) {
+  const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+  const days = Math.round((startOf(date) - startOf(now)) / 86_400_000)
+  if (days === 0) return 'Today'
+  if (days === 1) return 'Tomorrow'
+  return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+}
+
 function clock(minutes: number) {
   const hours = Math.floor(minutes / 60)
   return `${((hours + 11) % 12) + 1}:${String(minutes % 60).padStart(2, '0')}`
