@@ -9,18 +9,20 @@ function span(axis: Range, [start, end]: Range) {
 }
 
 // One day drawn to scale: class time hatched, the free gaps between classes
-// outlined. The drawing is summarized for screen readers, and every page that
+// outlined, and time shared with another student in highlighter. The drawing is summarized for screen readers, and every page that
 // uses it also lists the same times as text.
 export default function TimeStrip({
   axis,
   busy,
   free = [],
+  shared = [],
   now,
   summary,
 }: {
   axis: Range
   busy: Range[]
   free?: Range[]
+  shared?: Range[]
   now?: number
   summary: string
 }) {
@@ -32,6 +34,13 @@ export default function TimeStrip({
         <div
           key={range[0]}
           className="absolute inset-y-1.5 rounded-sm border border-dashed border-ink"
+          style={span(axis, range)}
+        />
+      ))}
+      {shared.map((range) => (
+        <div
+          key={range[0]}
+          className="absolute inset-y-1 rounded-sm border border-ink bg-highlighter"
           style={span(axis, range)}
         />
       ))}
