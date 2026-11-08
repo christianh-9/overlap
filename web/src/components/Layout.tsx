@@ -3,6 +3,7 @@ import { getToken } from '../api/client'
 
 const TABS = [
   { to: '/matches', label: 'Matches' },
+  { to: '/activities', label: 'Activities' },
   { to: '/schedule', label: 'Schedule' },
   { to: '/setup', label: 'Profile' },
 ]

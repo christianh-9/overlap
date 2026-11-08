@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   axisFor,
+  dateInputValue,
+  dayHeading,
   formatDuration,
   formatRange,
   formatTime,
   freeGaps,
+  minutesOf,
   parseWindow,
   toMinutes,
   weekdayOf,
@@ -84,5 +87,23 @@ describe('match windows', () => {
     expect(formatDuration(45)).toBe('45m')
     expect(formatDuration(60)).toBe('1h')
     expect(formatDuration(90)).toBe('1h 30m')
+  })
+})
+
+describe('dates', () => {
+  const now = new Date(2026, 10, 8, 22, 30)
+
+  it('labels today and tomorrow by calendar day, not 24 hours', () => {
+    expect(dayHeading(new Date(2026, 10, 8, 23, 59), now)).toBe('Today')
+    expect(dayHeading(new Date(2026, 10, 9, 0, 15), now)).toBe('Tomorrow')
+  })
+
+  it('names later days with the date', () => {
+    expect(dayHeading(new Date(2026, 10, 11, 15, 30), now)).toBe('Wednesday, Nov 11')
+  })
+
+  it('reads local minutes and date input values', () => {
+    expect(minutesOf(new Date(2026, 10, 11, 15, 30))).toBe(930)
+    expect(dateInputValue(new Date(2026, 0, 5))).toBe('2026-01-05')
   })
 })
