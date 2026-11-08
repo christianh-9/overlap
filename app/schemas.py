@@ -79,6 +79,7 @@ class MatchOut(BaseModel):
     shared_courses: int
     same_major: bool
     same_transfer_school: bool
+    waved: bool
 
 
 class ActivityIn(BaseModel):

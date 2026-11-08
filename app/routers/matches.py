@@ -10,7 +10,7 @@ from app.auth import current_user
 from app.config import settings
 from app.db import get_db
 from app.matching import fmt, free_gaps, intersect, to_minutes, total_minutes
-from app.models import Block, Course, Enrollment, Meeting, User
+from app.models import Block, Course, Enrollment, Meeting, User, Wave
 from app.schemas import MatchOut, ProfileOut
 
 router = APIRouter(prefix="/matches", tags=["matches"])
@@ -79,6 +79,7 @@ def matches(
         shared[user_id] += 1
 
     users = db.scalars(select(User).where(User.id.in_(candidates))).all()
+    waved = set(db.scalars(select(Wave.recipient_id).where(Wave.sender_id == me.id)))
     results = []
 
     for user in users:
@@ -92,6 +93,7 @@ def matches(
                 same_major=bool(me.major) and user.major == me.major,
                 same_transfer_school=bool(me.transfer_from)
                 and user.transfer_from == me.transfer_from,
+                waved=user.id in waved,
             )
         )
 
