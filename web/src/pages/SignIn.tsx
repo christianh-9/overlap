@@ -207,7 +207,7 @@ function Lane({ classes, className }: { classes: number[][]; className?: string 
       {classes.map(([start, end]) => (
         <div
           key={start}
-          className="hatch absolute inset-y-0"
+          className="hatch-rule absolute inset-y-0"
           style={{ left: at(start), width: at(end - start) }}
         />
       ))}
