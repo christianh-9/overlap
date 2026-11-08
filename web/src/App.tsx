@@ -1,5 +1,6 @@
 import { Link, Route, Routes } from 'react-router'
 import Layout from './components/Layout'
+import SignIn from './pages/SignIn'
 
 function NotFound() {
   return (
@@ -16,6 +17,7 @@ function NotFound() {
 export default function App() {
   return (
     <Routes>
+      <Route path="/sign-in" element={<SignIn />} />
       <Route element={<Layout />}>
         <Route path="*" element={<NotFound />} />
       </Route>
