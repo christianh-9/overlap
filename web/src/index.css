@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-chalk: #f2f4f1;
+  --color-card: #ffffff;
+  --color-ink: #1d2a25;
+  --color-moss: #56645d;
+  --color-rule: #cdd5d0;
+  --color-highlighter: #f2df4b;
+  --color-danger: #b42318;
+
+  --font-sans: 'Atkinson Hyperlegible Next', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Martian Mono', ui-monospace, monospace;
+
+  --radius-card: 10px;
+}
+
+@utility hatch {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-rule) 0 2px,
+    transparent 2px 6px
+  );
+}
+
+@layer base {
+  html {
+    @apply bg-chalk font-sans text-ink antialiased;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
