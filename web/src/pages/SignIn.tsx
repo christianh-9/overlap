@@ -1,8 +1,9 @@
 import { useMutation } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
-import { api, setToken } from '../api/client'
+import { Navigate, useNavigate } from 'react-router'
+import { api, getToken, setToken } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
+import SubmitButton from '../components/SubmitButton'
 import Waking from '../components/Waking'
 
 // request-code has no response model on the backend, so its type is unknown.
@@ -74,6 +75,9 @@ export default function SignIn() {
       {error}
     </p>
   )
+
+  // After all hooks, because hooks must run in the same order on every render.
+  if (getToken()) return <Navigate to="/" replace />
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-sm flex-col px-4 pt-16 pb-10 lg:max-w-5xl lg:px-8 lg:pt-10">
@@ -177,18 +181,6 @@ export default function SignIn() {
         </div>
       </div>
     </div>
-  )
-}
-
-function SubmitButton({ pending, children }: { pending: boolean; children: string }) {
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="mt-2 h-12 rounded-card bg-ink font-bold text-chalk transition-opacity disabled:opacity-60"
-    >
-      {pending ? 'One moment...' : children}
-    </button>
   )
 }
 

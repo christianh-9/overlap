@@ -1,5 +1,8 @@
 import { Link, Route, Routes } from 'react-router'
 import Layout from './components/Layout'
+import RequireAuth from './components/RequireAuth'
+import Home from './pages/Home'
+import ProfileSetup from './pages/ProfileSetup'
 import SignIn from './pages/SignIn'
 
 function NotFound() {
@@ -19,6 +22,10 @@ export default function App() {
     <Routes>
       <Route path="/sign-in" element={<SignIn />} />
       <Route element={<Layout />}>
+        <Route element={<RequireAuth />}>
+          <Route index element={<Home />} />
+          <Route path="setup" element={<ProfileSetup />} />
+        </Route>
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
