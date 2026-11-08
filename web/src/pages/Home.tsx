@@ -12,12 +12,5 @@ export default function Home() {
     )
   }
 
-  if (me.data.display_name === '') return <Navigate to="/setup" replace />
-
-  return (
-    <section className="py-12">
-      <h1 className="text-2xl font-bold">You're all set, {me.data.display_name}</h1>
-      <p className="mt-2 text-moss">Your profile is saved.</p>
-    </section>
-  )
+  return <Navigate to={me.data.display_name === '' ? '/setup' : '/schedule'} replace />
 }

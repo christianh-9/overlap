@@ -3,6 +3,7 @@ import Layout from './components/Layout'
 import RequireAuth from './components/RequireAuth'
 import Home from './pages/Home'
 import ProfileSetup from './pages/ProfileSetup'
+import Schedule from './pages/Schedule'
 import SignIn from './pages/SignIn'
 
 function NotFound() {
@@ -25,6 +26,7 @@ export default function App() {
         <Route element={<RequireAuth />}>
           <Route index element={<Home />} />
           <Route path="setup" element={<ProfileSetup />} />
+          <Route path="schedule" element={<Schedule />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Route>
