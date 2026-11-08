@@ -82,26 +82,26 @@ def matches(
     results = []
 
     for user in users:
-        windows = candidates[user_id]
+        windows = candidates[user.id]
         results.append(
             MatchOut(
                 profile=ProfileOut.model_validate(user),
                 windows=[f"{fmt(s)}-{fmt(e)}" for s, e in windows],
                 overlap_minutes=total_minutes(windows),
-                shared_courses=shared[user_id],
+                shared_courses=shared[user.id],
                 same_major=bool(me.major) and user.major == me.major,
                 same_transfer_school=bool(me.transfer_from)
                 and user.transfer_from == me.transfer_from,
             )
         )
 
-        results.sort(
-            key=lambda m: (
-                m.shared_courses,
-                m.same_transfer_school,
-                m.same_major,
-                m.overlap_minutes,
-            ),
-            reverse=True,
-        )
-        return results[:limit]
+    results.sort(
+        key=lambda m: (
+            m.shared_courses,
+            m.same_transfer_school,
+            m.same_major,
+            m.overlap_minutes,
+        ),
+        reverse=True,
+    )
+    return results[:limit]
