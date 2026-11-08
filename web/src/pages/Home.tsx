@@ -12,5 +12,5 @@ export default function Home() {
     )
   }
 
-  return <Navigate to={me.data.display_name === '' ? '/setup' : '/schedule'} replace />
+  return <Navigate to={me.data.display_name === '' ? '/setup' : '/matches'} replace />
 }

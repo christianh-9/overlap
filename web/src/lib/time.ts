@@ -12,6 +12,19 @@ export function toMinutes(time: string) {
   return hours * 60 + minutes
 }
 
+// The matches API sends shared windows as "10:00-12:00" on a 24-hour clock.
+export function parseWindow(window: string): Range {
+  const [start, end] = window.split('-')
+  return [toMinutes(start), toMinutes(end)]
+}
+
+export function formatDuration(minutes: number) {
+  const hours = Math.floor(minutes / 60)
+  const rest = minutes % 60
+  if (hours === 0) return `${rest}m`
+  return rest === 0 ? `${hours}h` : `${hours}h ${rest}m`
+}
+
 // JavaScript counts weekdays from Sunday = 0; the API counts from Monday = 0.
 export function weekdayOf(date: Date) {
   return (date.getDay() + 6) % 7

@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { axisFor, formatRange, formatTime, freeGaps, toMinutes, weekdayOf } from './time'
+import {
+  axisFor,
+  formatDuration,
+  formatRange,
+  formatTime,
+  freeGaps,
+  parseWindow,
+  toMinutes,
+  weekdayOf,
+} from './time'
 
 describe('freeGaps', () => {
   it('returns gaps between classes, not before the first or after the last', () => {
@@ -62,5 +71,18 @@ describe('axisFor', () => {
 
   it('widens to the hour around classes outside the day', () => {
     expect(axisFor([[450, 520], [1300, 1350]])).toEqual([420, 1380])
+  })
+})
+
+describe('match windows', () => {
+  it('parses the API window format', () => {
+    expect(parseWindow('10:00-12:00')).toEqual([600, 720])
+    expect(parseWindow('13:30-14:05')).toEqual([810, 845])
+  })
+
+  it('formats durations without zero parts', () => {
+    expect(formatDuration(45)).toBe('45m')
+    expect(formatDuration(60)).toBe('1h')
+    expect(formatDuration(90)).toBe('1h 30m')
   })
 })

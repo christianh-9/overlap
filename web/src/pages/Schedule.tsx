@@ -2,7 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { api } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
-import { useSchedule, type Course } from '../api/schedule'
+import { dayRanges, scheduleDays, useSchedule, type Course } from '../api/schedule'
+import DayPicker from '../components/DayPicker'
 import { LoadError, Loading } from '../components/QueryStatus'
 import SubmitButton from '../components/SubmitButton'
 import TimeStrip, { TimeTicks } from '../components/TimeStrip'
@@ -25,14 +26,6 @@ const WEBSOC = 'https://www.reg.uci.edu/perl/WebSoc'
 
 function courseName(course: Course) {
   return `${course.dept} ${course.number}`
-}
-
-function dayRanges(courses: Course[], weekday: number): Range[] {
-  return courses.flatMap((course) =>
-    course.meetings
-      .filter((meeting) => meeting.weekday === weekday)
-      .map((meeting): Range => [toMinutes(meeting.start_time), toMinutes(meeting.end_time)]),
-  )
 }
 
 function summarize(weekday: number, busy: Range[], free: Range[]) {
@@ -87,10 +80,7 @@ function ScheduleView({ courses }: { courses: Course[] }) {
   const today = weekdayOf(now)
   const nowMinutes = now.getHours() * 60 + now.getMinutes()
 
-  const weekend = [5, 6].filter((day) =>
-    courses.some((course) => course.meetings.some((meeting) => meeting.weekday === day)),
-  )
-  const days = [0, 1, 2, 3, 4, ...weekend]
+  const days = scheduleDays(courses)
   const [day, setDay] = useState(days.includes(today) ? today : 0)
   const [code, setCode] = useState('')
   const [localError, setLocalError] = useState<string | null>(null)
@@ -103,6 +93,7 @@ function ScheduleView({ courses }: { courses: Course[] }) {
       queryClient.setQueryData<Course[]>(['schedule'], (old = []) =>
         old.some((existing) => existing.id === course.id) ? old : [...old, course],
       )
+      queryClient.invalidateQueries({ queryKey: ['matches'] })
       setCode('')
       setNotice({ text: `Added ${courseName(course)}.` })
     },
@@ -121,6 +112,7 @@ function ScheduleView({ courses }: { courses: Course[] }) {
       queryClient.setQueryData<Course[]>(['schedule'], (old = []) =>
         old.filter((existing) => existing.id !== course.id),
       )
+      queryClient.invalidateQueries({ queryKey: ['matches'] })
       setNotice({ text: `Dropped ${courseName(course)}.`, undo: course.course_code })
     },
   })
@@ -212,21 +204,7 @@ function ScheduleView({ courses }: { courses: Course[] }) {
         ) : (
           <>
             <section className="mt-8 lg:hidden" aria-labelledby="day-heading">
-              <div role="group" aria-label="Day" className="flex gap-1.5">
-                {days.map((weekday) => (
-                  <button
-                    key={weekday}
-                    type="button"
-                    aria-pressed={weekday === day}
-                    onClick={() => setDay(weekday)}
-                    className={`h-10 flex-1 rounded-card border text-sm font-bold ${
-                      weekday === day ? 'border-ink bg-ink text-chalk' : 'border-rule bg-card'
-                    }`}
-                  >
-                    {DAY_SHORT[weekday]}
-                  </button>
-                ))}
-              </div>
+              <DayPicker days={days} value={day} onChange={setDay} />
               <h2 id="day-heading" className="mt-5 font-bold">
                 {day === today ? `Today, ${DAY_NAMES[day]}` : DAY_NAMES[day]}
               </h2>
