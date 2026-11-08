@@ -1,6 +1,7 @@
 import { Link, Route, Routes } from 'react-router'
 import Layout from './components/Layout'
 import RequireAuth from './components/RequireAuth'
+import Activities from './pages/Activities'
 import Home from './pages/Home'
 import Matches from './pages/Matches'
 import ProfileSetup from './pages/ProfileSetup'
@@ -28,6 +29,7 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="setup" element={<ProfileSetup />} />
           <Route path="matches" element={<Matches />} />
+          <Route path="activities" element={<Activities />} />
           <Route path="schedule" element={<Schedule />} />
         </Route>
         <Route path="*" element={<NotFound />} />
