@@ -1,13 +1,12 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-
-from app.db import SessionLocal
-from app.routers import activities, admin, auth, matches, profiles, schedule, waves
-from app.seed import seed_campuses
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.db import SessionLocal
+from app.routers import activities, admin, auth, matches, profiles, schedule, waves
+from app.seed import seed_campuses
 
 
 @asynccontextmanager
