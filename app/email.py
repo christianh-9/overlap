@@ -15,7 +15,7 @@ def send_login_code(to: str, code: str) -> None:
     try:
         response = httpx.post(
             RESEND_URL,
-            headers={"Authorizaiton": f"Bearer {settings.resend_api_key}"},
+            headers={"Authorization": f"Bearer {settings.resend_api_key}"},
             json={
                 "from": settings.email_from,
                 "to": [to],

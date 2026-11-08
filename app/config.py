@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     timezone: str = "America/Los_Angeles"
     admin_emails: list[str] = []
     resend_api_key: str = ""
-    email_from: str = "Overlap <onboarding@resend.dev"
+    email_from: str = "Overlap <onboarding@resend.dev>"
 
     cors_origin: list[str] = ["https://localhost:5173"]
 
