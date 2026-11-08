@@ -137,7 +137,11 @@ export default function Matches() {
           />
         ) : matches.data.length === 0 ? (
           <Empty>
-            Nobody else is free during your gaps on {dayName} yet. Check another day.
+            Nobody else is free during your gaps on {dayName} yet. Check another day, or{' '}
+            <Link to="/activities" className="text-ink underline underline-offset-4">
+              browse meetups
+            </Link>
+            .
           </Empty>
         ) : (
           <MatchList
