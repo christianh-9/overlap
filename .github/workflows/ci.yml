@@ -17,7 +17,8 @@ jobs:
       - uses: actions/checkout@v7
 
       # Reads .python-version, so CI uses the same Python as local development.
-      - uses: astral-sh/setup-uv@v10
+      # setup-uv only publishes exact version tags, so there's no plain v10.
+      - uses: astral-sh/setup-uv@v10.3.3
         with:
           enable-cache: true
 
