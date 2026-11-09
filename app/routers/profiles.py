@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import or_, select
+from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
 
 from app.auth import current_user
 from app.db import get_db
-from app.models import Block, Report, User
+from app.models import Block, LoginCode, Report, User
 from app.schemas import MeOut, ProfileOut, ProfileUpdate, ReportIn
 
 router = APIRouter(tags=["profiles"])
@@ -36,6 +36,16 @@ def update_me(body: ProfileUpdate, me: User = Depends(current_user), db: Session
     db.add(me)
     db.commit()
     return me
+
+
+@router.delete("/me", status_code=204)
+def delete_me(me: User = Depends(current_user), db: Session = Depends(get_db)):
+    # Schedule, waves, blocks, and meetups go with the user through the foreign
+    # keys' ON DELETE rules. Login codes are stored by email with no foreign key,
+    # so they're removed here.
+    db.execute(delete(LoginCode).where(LoginCode.email == me.email))
+    db.delete(me)
+    db.commit()
 
 
 @router.get("/users/{user_id}", response_model=ProfileOut)
