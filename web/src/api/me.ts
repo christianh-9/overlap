@@ -15,9 +15,11 @@ export function useMe() {
 export function useSignOut() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
-  return () => {
+  // A notice, like "Your account was deleted.", rides along in router state for
+  // sign-in to show once.
+  return (notice?: string) => {
     clearToken()
     queryClient.clear()
-    navigate('/sign-in', { replace: true })
+    navigate('/sign-in', { replace: true, state: notice ? { notice } : undefined })
   }
 }
