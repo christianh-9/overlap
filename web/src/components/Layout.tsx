@@ -69,7 +69,7 @@ export default function Layout() {
               })}
             </nav>
             {/* Profile is edited rarely, so it sits in the header instead of taking a tab. */}
-            <NavLink to="/setup" className={profileClass}>
+            <NavLink to="/profile" className={profileClass}>
               Profile
             </NavLink>
           </div>

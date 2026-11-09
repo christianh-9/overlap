@@ -5,6 +5,7 @@ import { api } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
 import { useMatches, type Match } from '../api/matches'
 import { dayRanges, scheduleDays, useSchedule } from '../api/schedule'
+import Avatar from '../components/Avatar'
 import DayPicker from '../components/DayPicker'
 import { LoadError, Loading } from '../components/QueryStatus'
 import TimeStrip, { TimeTicks } from '../components/TimeStrip'
@@ -278,9 +279,12 @@ function MatchCard({
   return (
     <li className="rounded-card border border-rule bg-card p-5">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="text-lg font-bold">{profile.display_name}</h3>
-          {details && <p className="text-sm text-moss">{details}</p>}
+        <div className="flex min-w-0 items-center gap-3">
+          <Avatar id={profile.id} name={profile.display_name} />
+          <div className="min-w-0">
+            <h3 className="text-lg font-bold">{profile.display_name}</h3>
+            {details && <p className="text-sm text-moss">{details}</p>}
+          </div>
         </div>
         {freeNow && (
           <span className="shrink-0 rounded-full border border-ink bg-highlighter px-2.5 py-0.5 text-sm font-bold">
