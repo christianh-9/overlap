@@ -21,7 +21,8 @@ def test_login_email_request(monkeypatch):
 
     assert sent["headers"]["Authorization"] == "Bearer test-key"
     assert sent["json"]["to"] == ["alice@uci.edu"]
-    assert "123456" in sent["json"]["subject"]
+    assert sent["json"]["subject"] == "Your Overlap code: 123456"
+    assert sent["json"]["text"].startswith("Your Overlap login code is 123456.")
     assert re.fullmatch(r".+ <[^<>]+@[^<>]+>", sent["json"]["from"])
 
 

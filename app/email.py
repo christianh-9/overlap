@@ -19,9 +19,9 @@ def send_login_code(to: str, code: str) -> None:
             json={
                 "from": settings.email_from,
                 "to": [to],
-                "subject": f"Your overlap code: {code}",
+                "subject": f"Your Overlap code: {code}",
                 "text": (
-                    f"Your overlap login code is {code}.\n\n"
+                    f"Your Overlap login code is {code}.\n\n"
                     "It expires in 10 minutes. If you didn't request it, you can ignore this email."
                 ),
             },
