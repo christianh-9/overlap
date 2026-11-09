@@ -1,3 +1,6 @@
+import pytest
+
+
 def course(code, dept, number, *meetings):
     return {
         "course_code": code,
@@ -72,3 +75,11 @@ def test_unkown_section_404(client, login):
     alice = login("alice@uci.edu")
     r = client.post("/schedule/courses", headers=alice, json={"course_code": "99999"})
     assert r.status_code == 404
+
+
+@pytest.mark.parametrize("field", ["display_name", "is_transfer", "bio"])
+def test_profile_rejects_null_for_required_fields(client, login, field):
+    headers = login("alice@uci.edu")
+    response = client.patch("/me", headers=headers, json={field: None})
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"] == ["body", field]

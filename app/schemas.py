@@ -1,7 +1,7 @@
 from datetime import datetime, time
 from typing import Literal
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class CodeRequest(BaseModel):
@@ -45,6 +45,15 @@ class ProfileUpdate(BaseModel):
     home_city: str | None = Field(None, max_length=100)
     contact: str | None = Field(None, max_length=100)
     bio: str | None = Field(None, max_length=500)
+
+    # None as the default means "leave this field alone", but these columns can't
+    # store null, so an explicit null gets a clear 422 instead of a database error.
+    @field_validator("display_name", "is_transfer", "bio")
+    @classmethod
+    def not_null(cls, value):
+        if value is None:
+            raise ValueError("can't be null")
+        return value
 
 
 class CourseAdd(BaseModel):
