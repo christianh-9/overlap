@@ -5,6 +5,7 @@ import { api } from '../api/client'
 import { ApiError, errorMessage, unwrap } from '../api/errors'
 import { useMe } from '../api/me'
 import { dayRanges, useSchedule } from '../api/schedule'
+import Avatar from '../components/Avatar'
 import { LoadError, Loading } from '../components/QueryStatus'
 import SubmitButton from '../components/SubmitButton'
 import Waking from '../components/Waking'
@@ -252,7 +253,8 @@ function ActivityCard({
         <div className="min-w-0 flex-1">
           <h3 className="font-bold break-words">{activity.title}</h3>
           <p className="text-sm break-words">{activity.location}</p>
-          <p className="mt-1 text-sm text-moss">
+          <p className="mt-1.5 flex items-center gap-2 text-sm text-moss">
+            <Avatar id={activity.creator.id} name={activity.creator.display_name} size="sm" />
             {mine ? 'Posted by you' : `Posted by ${activity.creator.display_name}`}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">

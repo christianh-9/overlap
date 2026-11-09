@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { api } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
 import { useConnections, useReceivedWaves, type Connection, type Profile } from '../api/waves'
+import Avatar from '../components/Avatar'
 import { LoadError, Loading } from '../components/QueryStatus'
 import SafetyMenu from '../components/SafetyMenu'
 
@@ -155,8 +156,13 @@ function PersonCard({ profile, children }: { profile: Profile; children: ReactNo
     .join(' · ')
   return (
     <li className="rounded-card border border-rule bg-card p-5">
-      <h3 className="text-lg font-bold">{profile.display_name}</h3>
-      {details && <p className="text-sm text-moss">{details}</p>}
+      <div className="flex items-center gap-3">
+        <Avatar id={profile.id} name={profile.display_name} />
+        <div className="min-w-0">
+          <h3 className="text-lg font-bold">{profile.display_name}</h3>
+          {details && <p className="text-sm text-moss">{details}</p>}
+        </div>
+      </div>
       {profile.is_transfer && profile.transfer_from && (
         <p className="mt-1 text-sm">Transferred from {profile.transfer_from}</p>
       )}
