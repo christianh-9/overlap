@@ -5,6 +5,7 @@ import Activities from './pages/Activities'
 import Connections from './pages/Connections'
 import Home from './pages/Home'
 import Matches from './pages/Matches'
+import Profile from './pages/Profile'
 import ProfileSetup from './pages/ProfileSetup'
 import Schedule from './pages/Schedule'
 import SignIn from './pages/SignIn'
@@ -29,6 +30,7 @@ export default function App() {
         <Route element={<RequireAuth />}>
           <Route index element={<Home />} />
           <Route path="setup" element={<ProfileSetup />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="matches" element={<Matches />} />
           <Route path="activities" element={<Activities />} />
           <Route path="connections" element={<Connections />} />
