@@ -34,7 +34,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(254), unique=True)
     display_name: Mapped[str] = mapped_column(String(50), default="")
     major: Mapped[str | None] = mapped_column(String(100))
-    grad_year: Mapped[str | None] = mapped_column(SmallInteger)
+    grad_year: Mapped[int | None] = mapped_column(SmallInteger)
     is_transfer: Mapped[bool] = mapped_column(Boolean, default=False)
     transfer_from: Mapped[str | None] = mapped_column(String(100))
     home_city: Mapped[str | None] = mapped_column(String(100))
