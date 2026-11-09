@@ -1,10 +1,13 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.db import SessionLocal
+from app.db import SessionLocal, get_db
 from app.routers import activities, admin, auth, matches, profiles, schedule, waves
 from app.seed import seed_campuses
 
@@ -30,5 +33,10 @@ app.include_router(admin.router)
 
 
 @app.get("/health")
-def health():
+def health(db: Session = Depends(get_db)):
+    # Every real request needs the database, so health means it answers too.
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        raise HTTPException(503, "Database unavailable") from None
     return {"ok": True}
