@@ -13,7 +13,7 @@ RUN uv sync --locked --no-dev --no-install-project
 COPY . .
 RUN uv sync --locked --no-dev
 
-RUN useradd -create-home overlap
+RUN useradd --create-home overlap
 USER overlap
 
 CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]
