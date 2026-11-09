@@ -55,6 +55,25 @@ def block_user(user_id: int, me: User = Depends(current_user), db: Session = Dep
         db.commit()
 
 
+@router.delete("/users/{user_id}/block", status_code=204)
+def unblock_user(user_id: int, me: User = Depends(current_user), db: Session = Depends(get_db)):
+    # Only your own block is removed. If they also blocked you, theirs still hides you both.
+    block = db.get(Block, (me.id, user_id))
+    if block is not None:
+        db.delete(block)
+        db.commit()
+
+
+@router.get("/blocks", response_model=list[ProfileOut])
+def blocked_people(me: User = Depends(current_user), db: Session = Depends(get_db)):
+    return db.scalars(
+        select(User)
+        .join(Block, Block.blocked_id == User.id)
+        .where(Block.blocker_id == me.id)
+        .order_by(User.display_name)
+    ).all()
+
+
 @router.post("/users/{user_id}/report", status_code=201)
 def report_user(
     user_id: int, body: ReportIn, me: User = Depends(current_user), db: Session = Depends(get_db)
