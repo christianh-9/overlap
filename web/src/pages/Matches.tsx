@@ -175,7 +175,7 @@ function MatchList({
   now?: number
 }) {
   const queryClient = useQueryClient()
-  const [notice, setNotice] = useState<string | null>(null)
+  const [notice, setNotice] = useState<ReactNode>(null)
 
   const wave = useMutation({
     mutationFn: async (match: Match) => {
@@ -192,13 +192,23 @@ function MatchList({
       )
       // The same person can match on other days too, so those lists are now out of date.
       queryClient.invalidateQueries({ queryKey: ['matches'], refetchType: 'none' })
+      // A wave can complete a connection or answer one waiting on Connections.
+      queryClient.invalidateQueries({ queryKey: ['waves'] })
       // Names often end in an initial ("Leo M."), so they never end a sentence here.
       const name = match.profile.display_name
       setNotice(
         match.waved
           ? `Wave taken back. ${name} won't see it.`
           : mutual
-            ? `You and ${name} both waved. Their contact is on your Connections.`
+            ? (
+              <>
+                You and {name} both waved. Their contact is on your{' '}
+                <Link to="/connections" className="font-bold underline underline-offset-4">
+                  Connections
+                </Link>
+                .
+              </>
+            )
             : `${name} will see your wave. If they wave back, you'll both see each other's contact.`,
       )
     },
