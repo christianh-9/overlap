@@ -45,6 +45,7 @@ export default function Connections() {
       // Blocking hides them everywhere, so those lists are out of date too.
       queryClient.invalidateQueries({ queryKey: ['matches'], refetchType: 'none' })
       queryClient.invalidateQueries({ queryKey: ['activities'], refetchType: 'none' })
+      queryClient.invalidateQueries({ queryKey: ['blocks'], refetchType: 'none' })
     }
     setNotice(message)
     statusRef.current?.focus()
