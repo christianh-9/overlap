@@ -9,7 +9,7 @@ from app.config import settings
 from app.db import get_db
 from app.email import EmailFailed, Mailer, get_mailer
 from app.models import BannedEmail, Campus, LoginCode, User
-from app.schemas import CodeRequest, CodeVerify, Token
+from app.schemas import CodeRequest, CodeSent, CodeVerify, Token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -33,7 +33,8 @@ def recent_codes(db: Session, column, value: str, window: timedelta) -> int:
     return db.scalar(select(func.count()).where(column == value, LoginCode.created_at >= since))
 
 
-@router.post("/request-code")
+# exclude_none keeps production's response exactly {"sent": true}.
+@router.post("/request-code", response_model=CodeSent, response_model_exclude_none=True)
 def request_code(
     body: CodeRequest,
     request: Request,

@@ -6,13 +6,6 @@ import { errorMessage, unwrap } from '../api/errors'
 import SubmitButton from '../components/SubmitButton'
 import Waking from '../components/Waking'
 
-// request-code has no response model on the backend, so its type is unknown.
-// In local dev mode it includes the code so no email has to be sent.
-function devCode(body: unknown) {
-  const code = (body as { dev_code?: unknown } | undefined)?.dev_code
-  return typeof code === 'string' ? code : null
-}
-
 export default function SignIn() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -76,7 +69,8 @@ export default function SignIn() {
   const pending = requestCode.isPending || verify.isPending
   const failed = sentTo ? verify.error ?? requestCode.error : requestCode.error
   const error = localError ?? (failed ? errorMessage(failed) : null)
-  const dev = sentTo ? devCode(requestCode.data) : null
+  // Only present in local dev mode, so codes work without sending email.
+  const dev = sentTo ? requestCode.data?.dev_code : null
   const errorText = error && (
     <p id="sign-in-error" role="alert" className="text-danger">
       {error}
