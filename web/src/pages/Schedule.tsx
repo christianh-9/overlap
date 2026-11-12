@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { api } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
 import { dayRanges, scheduleDays, useSchedule, type Course } from '../api/schedule'
+import { useTerm } from '../api/term'
 import DayPicker from '../components/DayPicker'
 import { LoadError, Loading } from '../components/QueryStatus'
 import SubmitButton from '../components/SubmitButton'
@@ -76,6 +77,7 @@ export default function Schedule() {
 
 function ScheduleView({ courses }: { courses: Course[] }) {
   const queryClient = useQueryClient()
+  const term = useTerm().data?.label
   const now = useNow()
   const today = weekdayOf(now)
   const nowMinutes = now.getHours() * 60 + now.getMinutes()
@@ -142,6 +144,7 @@ function ScheduleView({ courses }: { courses: Course[] }) {
     <div className="pt-4 pb-16 lg:grid lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-start lg:gap-16 lg:pt-10">
       <div>
         <h1 className="text-3xl leading-tight font-bold">Schedule</h1>
+        {term && <p className="mt-1 text-moss">{term} classes</p>}
 
         <form onSubmit={submit} noValidate className="mt-6 flex flex-col gap-2">
           <label htmlFor="course_code" className="font-bold">
@@ -198,8 +201,8 @@ function ScheduleView({ courses }: { courses: Course[] }) {
 
         {courses.length === 0 ? (
           <p className="mt-8 rounded-card border border-dashed border-moss p-5 text-moss">
-            Add your classes to see your free time. Section codes are the 5-digit numbers in the
-            Schedule of Classes.
+            Add your {term ? `${term} ` : ''}classes to see your free time. Section codes are the
+            5-digit numbers in the Schedule of Classes.
           </p>
         ) : (
           <>

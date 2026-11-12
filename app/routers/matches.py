@@ -12,6 +12,7 @@ from app.db import get_db
 from app.matching import fmt, free_gaps, intersect, to_minutes, total_minutes
 from app.models import Block, Course, Enrollment, Meeting, User, Wave
 from app.schemas import MatchOut, ProfileOut
+from app.terms import current_term
 
 router = APIRouter(prefix="/matches", tags=["matches"])
 
@@ -25,6 +26,7 @@ def matches(
 ):
     if weekday is None:
         weekday = datetime.now(ZoneInfo(settings.timezone)).weekday()
+    term = current_term()
 
     rows = db.execute(
         select(Enrollment.user_id, Meeting.start_time, Meeting.end_time)
@@ -32,7 +34,7 @@ def matches(
         .join(Meeting, Meeting.course_id == Course.id)
         .where(
             Course.campus_id == me.campus_id,
-            Course.term == settings.current_term,
+            Course.term == term,
             Meeting.weekday == weekday,
         )
     ).all()
@@ -66,7 +68,7 @@ def matches(
         db.scalars(
             select(Enrollment.course_id)
             .join(Course, Course.id == Enrollment.course_id)
-            .where(Enrollment.user_id == me.id, Course.term == settings.current_term)
+            .where(Enrollment.user_id == me.id, Course.term == term)
         )
     )
 

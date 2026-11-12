@@ -83,3 +83,7 @@ def test_profile_rejects_null_for_required_fields(client, login, field):
     response = client.patch("/me", headers=headers, json={field: None})
     assert response.status_code == 422
     assert response.json()["detail"][0]["loc"] == ["body", field]
+
+
+def test_term_endpoint(client):
+    assert client.get("/term").json() == {"term": "2026-fall", "label": "Fall 2026"}

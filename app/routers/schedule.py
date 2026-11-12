@@ -7,10 +7,10 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.anteater import CourseNotFound, SectionData, SourceUnavailable, fetch_section
 from app.auth import current_user
-from app.config import settings
 from app.db import get_db
 from app.models import Course, Enrollment, Meeting, User
 from app.schemas import CourseAdd, CourseOut
+from app.terms import current_term
 
 router = APIRouter(prefix="/schedule", tags=["schedule"])
 
@@ -26,7 +26,7 @@ def my_schedule(me: User = Depends(current_user), db: Session = Depends(get_db))
     return db.scalars(
         select(Course)
         .join(Enrollment, Enrollment.course_id == Course.id)
-        .where(Enrollment.user_id == me.id, Course.term == settings.current_term)
+        .where(Enrollment.user_id == me.id, Course.term == current_term())
         .options(selectinload(Course.meetings))
     ).all()
 
@@ -38,24 +38,27 @@ def add_course(
     db: Session = Depends(get_db),
     fetch: Fetcher = Depends(get_fetcher),
 ):
+    # Read once so the lookup, the Anteater request, and the saved row all agree,
+    # even if the term changes over mid-request.
+    term = current_term()
     course = db.scalar(
         select(Course).where(
             Course.campus_id == me.campus_id,
-            Course.term == settings.current_term,
+            Course.term == term,
             Course.course_code == body.course_code,
         )
     )
 
     if course is None:
         try:
-            section = fetch(settings.current_term, body.course_code)
+            section = fetch(term, body.course_code)
         except CourseNotFound:
             raise HTTPException(404, f"No section {body.course_code} this term") from None
         except SourceUnavailable:
             raise HTTPException(502, "UCI schedule unavailable, try again") from None
         course = Course(
             campus_id=me.campus_id,
-            term=settings.current_term,
+            term=term,
             course_code=body.course_code,
             dept=section.dept,
             number=section.number,

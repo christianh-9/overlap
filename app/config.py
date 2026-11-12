@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     jwt_secret: str = "dev-only-secret-not-for-production-use"
     jwt_ttl_hours: int = 24 * 7
     dev_mode: bool = True
-    current_term: str = "2026-fall"
+    # Unset means automatic, from the UCI calendar (app/terms.py). Set it to force a term.
+    current_term: str | None = None
     min_gap_minutes: int = 30
     min_overlap_minutes: int = 30
     timezone: str = "America/Los_Angeles"
