@@ -9,12 +9,21 @@ from datetime import time
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 
 from app.anteater import CourseNotFound, MeetingData, SectionData
 from app.db import Base, engine
 from app.email import get_mailer
 from app.main import app
 from app.routers.schedule import get_fetcher
+
+
+# SQLite ignores ON DELETE rules unless each connection turns them on. Without
+# this, tests can't see the cleanup Postgres does when a user is deleted.
+@event.listens_for(engine, "connect")
+def enforce_foreign_keys(connection, _):
+    connection.execute("PRAGMA foreign_keys=ON")
+
 
 FAKE_SECTIONS = {
     "34000": ("I&C SCI", "46", [(0, "09:00", "10:00")]),

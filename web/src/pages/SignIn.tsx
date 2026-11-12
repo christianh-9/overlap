@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
-import { useState, type FormEvent } from 'react'
-import { Navigate, useNavigate } from 'react-router'
+import { useEffect, useState, type FormEvent } from 'react'
+import { Navigate, useLocation, useNavigate } from 'react-router'
 import { api, getToken, setToken } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
 import SubmitButton from '../components/SubmitButton'
@@ -15,6 +15,13 @@ function devCode(body: unknown) {
 
 export default function SignIn() {
   const navigate = useNavigate()
+  const location = useLocation()
+  // Read once, then cleared from the history entry: browsers keep router state
+  // across reloads, and the notice should only show the first time.
+  const [notice] = useState(() => (location.state as { notice?: string } | null)?.notice)
+  useEffect(() => {
+    if (location.state) navigate(location.pathname, { replace: true, state: null })
+  }, [location, navigate])
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [sentTo, setSentTo] = useState<string | null>(null)
@@ -82,6 +89,11 @@ export default function SignIn() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-sm flex-col px-4 pt-16 pb-10 lg:max-w-5xl lg:px-8 lg:pt-10">
       <p className="text-lg font-bold tracking-tight">Overlap</p>
+      {notice && (
+        <p role="status" className="mt-6 rounded-card border border-rule bg-card px-4 py-3">
+          {notice}
+        </p>
+      )}
 
       <div className="lg:my-auto lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-center lg:gap-16">
         {/* Phones drop the intro once the code is sent, to keep the code field

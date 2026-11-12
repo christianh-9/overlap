@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { api } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
 import { useMe, useSignOut } from '../api/me'
@@ -36,7 +36,7 @@ export default function Profile() {
           </p>
           <button
             type="button"
-            onClick={signOut}
+            onClick={() => signOut()}
             className="h-11 rounded-card border border-ink px-5 font-bold"
           >
             Sign out
@@ -79,6 +79,10 @@ export default function Profile() {
             Irvine.
           </p>
         </div>
+      </Section>
+
+      <Section title="Delete account">
+        <DeleteAccount email={me.data.email} />
       </Section>
     </ProfileForm>
   )
@@ -169,5 +173,98 @@ function BlockedPeople() {
         </ul>
       )}
     </div>
+  )
+}
+
+function DeleteAccount({ email }: { email: string }) {
+  const signOut = useSignOut()
+  const [open, setOpen] = useState(false)
+  const [typed, setTyped] = useState('')
+  const openRef = useRef<HTMLButtonElement>(null)
+  const wasOpen = useRef(false)
+  const matches = typed.trim().toLowerCase() === email.toLowerCase()
+
+  // Cancel hides the confirmation, so focus goes back to the button that opened it.
+  useEffect(() => {
+    if (wasOpen.current && !open) openRef.current?.focus()
+    wasOpen.current = open
+  }, [open])
+
+  const remove = useMutation({
+    mutationFn: async () => unwrap(await api.DELETE('/me')),
+    onSuccess: () => signOut('Your account was deleted.'),
+  })
+
+  if (!open) {
+    return (
+      <div>
+        <p className="text-moss">
+          This removes your profile, schedule, waves, connections, and the meetups you posted.
+          It can't be undone.
+        </p>
+        <button
+          ref={openRef}
+          type="button"
+          onClick={() => setOpen(true)}
+          className="mt-3 h-11 rounded-card border border-danger px-5 font-bold text-danger"
+        >
+          Delete my account
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault()
+        if (matches) remove.mutate()
+      }}
+      className="rounded-card border border-danger p-4"
+    >
+      <p className="font-bold">Delete your account for good?</p>
+      <p className="mt-1 text-moss">
+        Your profile, schedule, waves, connections, and meetups you posted are removed. You can
+        sign up again later, but you'll start from scratch.
+      </p>
+      <label htmlFor="confirm-email" className="mt-4 block font-bold">
+        Type your email to confirm
+      </label>
+      <input
+        id="confirm-email"
+        type="email"
+        autoComplete="off"
+        autoFocus
+        placeholder={email}
+        value={typed}
+        onChange={(event) => setTyped(event.target.value)}
+        className="mt-2 h-12 w-full rounded-card border border-rule bg-card px-3"
+      />
+      {remove.error && (
+        <p role="alert" className="mt-2 text-danger">
+          {errorMessage(remove.error)}
+        </p>
+      )}
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="submit"
+          disabled={!matches || remove.isPending}
+          className="h-11 rounded-card bg-danger px-5 font-bold text-card disabled:opacity-50"
+        >
+          {remove.isPending ? 'Deleting...' : 'Delete account'}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(false)
+            setTyped('')
+            remove.reset()
+          }}
+          className="h-11 rounded-card border border-rule px-5 font-bold"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
   )
 }

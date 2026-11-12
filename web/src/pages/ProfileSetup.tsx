@@ -25,7 +25,7 @@ export default function ProfileSetup() {
     >
       <p className="mt-4 text-sm text-moss">
         Signed in as {me.data.email}. Not you?{' '}
-        <button type="button" onClick={signOut} className="text-ink underline underline-offset-4">
+        <button type="button" onClick={() => signOut()} className="text-ink underline underline-offset-4">
           Sign out
         </button>
       </p>
