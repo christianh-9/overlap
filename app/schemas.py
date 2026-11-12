@@ -8,6 +8,12 @@ class CodeRequest(BaseModel):
     email: EmailStr
 
 
+class CodeSent(BaseModel):
+    sent: bool
+    # Only in local dev mode, so codes can be used without sending email.
+    dev_code: str | None = None
+
+
 class CodeVerify(BaseModel):
     email: EmailStr
     code: str = Field(pattern=r"^\d{6}$")

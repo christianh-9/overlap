@@ -430,6 +430,13 @@ export interface components {
              */
             email: string;
         };
+        /** CodeSent */
+        CodeSent: {
+            /** Sent */
+            sent: boolean;
+            /** Dev Code */
+            dev_code?: string | null;
+        };
         /** CodeVerify */
         CodeVerify: {
             /**
@@ -676,7 +683,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["CodeSent"];
                 };
             };
             /** @description Validation Error */

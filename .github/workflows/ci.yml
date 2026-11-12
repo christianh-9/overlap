@@ -49,3 +49,24 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  # Fails when an endpoint changed but web/src/api/schema.d.ts wasn't regenerated.
+  api-types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: uv sync --locked
+      - run: npm run gen:api
+        working-directory: web
+      - name: Check the committed types match the backend
+        run: |
+          git diff --exit-code web/src/api/schema.d.ts || {
+            echo "::error::web/src/api/schema.d.ts is out of date. Run 'npm run gen:api' in web/ and commit it."
+            exit 1
+          }

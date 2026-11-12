@@ -22,6 +22,12 @@ def test_production_mode_emails_the_code(client, outbox, monkeypatch):
     assert verify(client, code).status_code == 200
 
 
+def test_dev_mode_returns_the_code(client):
+    body = request_code(client).json()
+    assert body["sent"] is True
+    assert body["dev_code"].isdigit() and len(body["dev_code"]) == 6
+
+
 def test_email_rate_limit(client):
     for _ in range(3):
         assert request_code(client).status_code == 200
