@@ -10,7 +10,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "preview": "vite preview",
-    "gen:api": "npx openapi-typescript@7.13.0 http://localhost:8000/openapi.json -o src/api/schema.d.ts"
+    "gen:api": "mkdir -p node_modules/.cache && uv run --directory .. python -m scripts.openapi > node_modules/.cache/openapi.json && npx openapi-typescript@7.13.0 node_modules/.cache/openapi.json -o src/api/schema.d.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.5",
