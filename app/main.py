@@ -9,7 +9,9 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.db import SessionLocal, get_db
 from app.routers import activities, admin, auth, matches, profiles, schedule, waves
+from app.schemas import TermOut
 from app.seed import seed_campuses
+from app.terms import current_term, term_label
 
 
 @asynccontextmanager
@@ -40,3 +42,9 @@ def health(db: Session = Depends(get_db)):
     except SQLAlchemyError:
         raise HTTPException(503, "Database unavailable") from None
     return {"ok": True}
+
+
+@app.get("/term", response_model=TermOut)
+def term():
+    current = current_term()
+    return TermOut(term=current, label=term_label(current))

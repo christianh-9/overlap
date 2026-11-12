@@ -56,6 +56,11 @@ class ProfileUpdate(BaseModel):
         return value
 
 
+class TermOut(BaseModel):
+    term: str
+    label: str
+
+
 class CourseAdd(BaseModel):
     course_code: str = Field(pattern=r"^\d{5}$")
 
