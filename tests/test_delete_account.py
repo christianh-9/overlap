@@ -49,14 +49,12 @@ def test_delete_account_removes_everything_tied_to_it(client, login):
 
     titles = {a["title"]: a for a in client.get("/activities", headers=bob).json()}
     assert "Alice's study group" not in titles
-    # Alice's spot in Bob's two-person meetup is free again.
     assert titles["Bob's lunch"]["member_count"] == 1
 
     with SessionLocal() as db:
         codes = select(func.count()).where(LoginCode.email == "alice@uci.edu")
         assert db.scalar(codes) == 0
         report = db.scalar(select(Report))
-        # The report she filed stays for moderation, without a link to her.
         assert report is not None
         assert report.reporter_id is None
 

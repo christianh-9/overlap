@@ -2,7 +2,6 @@ import os
 
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 os.environ["DEV_MODE"] = "true"
-# A fixed term keeps tests off the network and independent of today's date.
 os.environ["CURRENT_TERM"] = "2026-fall"
 os.environ["ADMIN_EMAILS"] = '["admin@uci.edu"]'
 os.environ["JWT_SECRET"] = "test-secret-that-is-at-least-32-bytes-long"
@@ -20,8 +19,6 @@ from app.main import app
 from app.routers.schedule import get_fetcher
 
 
-# SQLite ignores ON DELETE rules unless each connection turns them on. Without
-# this, tests can't see the cleanup Postgres does when a user is deleted.
 @event.listens_for(engine, "connect")
 def enforce_foreign_keys(connection, _):
     connection.execute("PRAGMA foreign_keys=ON")

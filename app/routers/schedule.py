@@ -38,8 +38,6 @@ def add_course(
     db: Session = Depends(get_db),
     fetch: Fetcher = Depends(get_fetcher),
 ):
-    # Read once so the lookup, the Anteater request, and the saved row all agree,
-    # even if the term changes over mid-request.
     term = current_term()
     course = db.scalar(
         select(Course).where(

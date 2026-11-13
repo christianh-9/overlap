@@ -15,7 +15,6 @@ def test_lists_only_people_you_blocked(client, login):
     client.post(f"/users/{bob_id}/block", headers=alice)
     blocked = client.get("/blocks", headers=alice).json()
     assert [p["display_name"] for p in blocked] == ["Bob"]
-    # Being blocked isn't something Bob gets to see.
     assert client.get("/blocks", headers=bob).json() == []
 
 
@@ -36,7 +35,6 @@ def test_unblock_only_removes_your_own_block(client, login):
     client.post(f"/users/{alice_id}/block", headers=bob)
 
     client.delete(f"/users/{bob_id}/block", headers=alice)
-    # Bob's block still stands, so they stay hidden from each other.
     assert client.get(f"/users/{bob_id}", headers=alice).status_code == 404
 
 

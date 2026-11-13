@@ -40,7 +40,6 @@ app.include_router(admin.router)
 
 @app.get("/health")
 def health(db: Session = Depends(get_db)):
-    # Every real request needs the database, so health means it answers too.
     try:
         db.execute(text("SELECT 1"))
     except SQLAlchemyError:

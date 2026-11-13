@@ -7,7 +7,7 @@ from app import terms
 from app.config import settings
 from app.terms import month_term, term_for, term_label
 
-# Real dates from Anteater API's /calendar/all, trimmed to the fields used.
+# dates from Anteater API's /calendar/all
 CALENDAR = [
     {"year": "2026", "quarter": "Spring", "finalsEnd": "2026-06-11"},
     {"year": "2026", "quarter": "Summer1", "finalsEnd": "2026-07-29"},
@@ -23,11 +23,11 @@ CALENDAR = [
     ("today", "expected"),
     [
         (date(2026, 11, 12), "2026-fall"),
-        (date(2026, 12, 11), "2026-fall"),  # last day of fall finals
-        (date(2026, 12, 12), "2027-winter"),  # the break: time to add winter classes
+        (date(2026, 12, 11), "2026-fall"),
+        (date(2026, 12, 12), "2027-winter"),
         (date(2027, 1, 20), "2027-winter"),
         (date(2027, 4, 15), "2027-spring"),
-        (date(2026, 7, 15), "2026-fall"),  # summer sessions are skipped
+        (date(2026, 7, 15), "2026-fall"),
     ],
 )
 def test_term_for_follows_finals(today, expected):
@@ -35,7 +35,6 @@ def test_term_for_follows_finals(today, expected):
 
 
 def test_term_for_is_none_once_the_calendar_runs_out():
-    # Summer 2027: Fall 2027 isn't published yet.
     assert term_for(date(2027, 7, 1), CALENDAR) is None
     assert term_for(date(2027, 7, 1), []) is None
 
@@ -60,7 +59,6 @@ def test_term_label():
 
 @pytest.fixture
 def auto(monkeypatch):
-    """current_term() with no override, a fixed date, a fake clock, and a fake fetch."""
     monkeypatch.setattr(settings, "current_term", None)
     monkeypatch.setattr(terms, "_cache", {"calendar": None, "next_fetch": 0.0})
     monkeypatch.setattr(terms, "_today", lambda: date(2026, 12, 12))
@@ -102,11 +100,10 @@ def test_failed_fetch_keeps_the_last_calendar(auto):
 
 def test_no_calendar_falls_back_to_the_month(auto):
     auto["fail"] = True
-    assert terms.current_term() == "2026-fall"  # December, by month
+    assert terms.current_term() == "2026-fall"
 
 
 def test_failed_fetch_waits_before_trying_again(auto):
-    # During an outage, only one request in a while should wait on the timeout.
     auto["fail"] = True
     terms.current_term()
     terms.current_term()

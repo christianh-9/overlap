@@ -33,7 +33,6 @@ def recent_codes(db: Session, column, value: str, window: timedelta) -> int:
     return db.scalar(select(func.count()).where(column == value, LoginCode.created_at >= since))
 
 
-# exclude_none keeps production's response exactly {"sent": true}.
 @router.post("/request-code", response_model=CodeSent, response_model_exclude_none=True)
 def request_code(
     body: CodeRequest,

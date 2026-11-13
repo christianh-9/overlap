@@ -11,7 +11,6 @@ class Settings(BaseSettings):
     jwt_secret: str = "dev-only-secret-not-for-production-use"
     jwt_ttl_hours: int = 24 * 7
     dev_mode: bool = True
-    # Unset means automatic, from the UCI calendar (app/terms.py). Set it to force a term.
     current_term: str | None = None
     min_gap_minutes: int = 30
     min_overlap_minutes: int = 30
@@ -21,8 +20,6 @@ class Settings(BaseSettings):
     email_from: str = "Overlap <onboarding@resend.dev>"
 
     cors_origin: list[str] = ["http://localhost:5173"]
-    # Matches Vercel preview addresses, so PR previews can reach the API. Unset
-    # means previews are refused. Set on the server, not in code.
     cors_origin_regex: str | None = None
 
     @field_validator("database_url")

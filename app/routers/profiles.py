@@ -40,9 +40,6 @@ def update_me(body: ProfileUpdate, me: User = Depends(current_user), db: Session
 
 @router.delete("/me", status_code=204)
 def delete_me(me: User = Depends(current_user), db: Session = Depends(get_db)):
-    # Schedule, waves, blocks, and meetups go with the user through the foreign
-    # keys' ON DELETE rules. Login codes are stored by email with no foreign key,
-    # so they're removed here.
     db.execute(delete(LoginCode).where(LoginCode.email == me.email))
     db.delete(me)
     db.commit()
@@ -67,7 +64,6 @@ def block_user(user_id: int, me: User = Depends(current_user), db: Session = Dep
 
 @router.delete("/users/{user_id}/block", status_code=204)
 def unblock_user(user_id: int, me: User = Depends(current_user), db: Session = Depends(get_db)):
-    # Only your own block is removed. If they also blocked you, theirs still hides you both.
     block = db.get(Block, (me.id, user_id))
     if block is not None:
         db.delete(block)

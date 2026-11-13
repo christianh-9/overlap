@@ -10,7 +10,6 @@ class CodeRequest(BaseModel):
 
 class CodeSent(BaseModel):
     sent: bool
-    # Only in local dev mode, so codes can be used without sending email.
     dev_code: str | None = None
 
 
@@ -52,8 +51,6 @@ class ProfileUpdate(BaseModel):
     contact: str | None = Field(None, max_length=100)
     bio: str | None = Field(None, max_length=500)
 
-    # None as the default means "leave this field alone", but these columns can't
-    # store null, so an explicit null gets a clear 422 instead of a database error.
     @field_validator("display_name", "is_transfer", "bio")
     @classmethod
     def not_null(cls, value):
