@@ -4,7 +4,7 @@ import { useActivities, type Activity } from '../api/activities'
 import { api } from '../api/client'
 import { ApiError, errorMessage, unwrap } from '../api/errors'
 import { useMe } from '../api/me'
-import { dayRanges, useSchedule } from '../api/schedule'
+import { dayRanges, hoursOn, useCampusHours, useSchedule } from '../api/schedule'
 import Avatar from '../components/Avatar'
 import { LoadError, Loading } from '../components/QueryStatus'
 import SubmitButton from '../components/SubmitButton'
@@ -13,7 +13,7 @@ import {
   dateInputValue,
   dayHeading,
   formatTime,
-  freeGaps,
+  freeWindows,
   minutesOf,
   weekdayOf,
   type Range,
@@ -54,6 +54,7 @@ export default function Activities() {
 function ActivitiesView({ activities, myId }: { activities: Activity[]; myId: number }) {
   const queryClient = useQueryClient()
   const schedule = useSchedule()
+  const campusHours = useCampusHours().data
   const now = useNow()
   const [formOpen, setFormOpen] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
@@ -128,7 +129,9 @@ function ActivitiesView({ activities, myId }: { activities: Activity[]; myId: nu
     if (!schedule.data) return false
     const start = new Date(activity.starts_at)
     const minutes = minutesOf(start)
-    return freeGaps(dayRanges(schedule.data, weekdayOf(start)), 30).some(
+    const weekday = weekdayOf(start)
+    const window = hoursOn(campusHours, weekday)
+    return freeWindows(dayRanges(schedule.data, weekday), window, 30).some(
       ([from, to]: Range) => minutes >= from && minutes < to,
     )
   }

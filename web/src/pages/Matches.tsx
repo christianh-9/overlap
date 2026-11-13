@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 import { api } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
 import { useMatches, type Match } from '../api/matches'
-import { dayRanges, scheduleDays, useSchedule } from '../api/schedule'
+import { dayRanges, hoursOn, scheduleDays, useCampusHours, useSchedule } from '../api/schedule'
 import { useTerm } from '../api/term'
 import Avatar from '../components/Avatar'
 import DayPicker from '../components/DayPicker'
@@ -16,7 +16,7 @@ import {
   DAY_NAMES,
   formatDuration,
   formatRange,
-  freeGaps,
+  freeWindows,
   parseWindow,
   weekdayOf,
   type Range,
@@ -31,6 +31,7 @@ function describe(ranges: Range[]) {
 
 export default function Matches() {
   const schedule = useSchedule()
+  const campusHours = useCampusHours().data
   const term = useTerm().data?.label
   const now = useNow()
   const today = weekdayOf(now)
@@ -54,7 +55,7 @@ export default function Matches() {
     )
   }
 
-  if (courses.length === 0) {
+  if (courses.length === 0 && !campusHours?.length) {
     return (
       <section className="pt-4 pb-16 lg:pt-10">
         <h1 className="text-3xl leading-tight font-bold">Matches</h1>
@@ -72,8 +73,9 @@ export default function Matches() {
   }
 
   const busy = dayRanges(courses, day)
-  const free = freeGaps(busy, MIN_GAP)
-  const axis = axisFor(busy)
+  const campus = hoursOn(campusHours, day)
+  const free = freeWindows(busy, campus, MIN_GAP)
+  const axis = axisFor(campus ? [...busy, campus] : busy)
   const nowMinutes = day === today ? now.getHours() * 60 + now.getMinutes() : undefined
   const dayName = DAY_NAMES[day]
 
@@ -81,7 +83,7 @@ export default function Matches() {
     <div className="pt-4 pb-16 lg:grid lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:items-start lg:gap-14 lg:pt-10">
       <section aria-labelledby="your-day" className="lg:sticky lg:top-6">
         <h1 className="text-3xl leading-tight font-bold">Matches</h1>
-        <p className="mt-2 text-moss">Students free between classes when you are.</p>
+        <p className="mt-2 text-moss">Students free on campus when you are.</p>
         <div className="mt-6">
           <DayPicker days={days} value={day} onChange={setPicked} />
         </div>
@@ -92,12 +94,13 @@ export default function Matches() {
           <TimeStrip
             axis={axis}
             busy={busy}
+            campus={campus}
             free={free}
             now={nowMinutes}
             summary={
               free.length
-                ? `Your ${dayName}: free between classes ${describe(free)}.`
-                : `Your ${dayName}: no gaps between classes.`
+                ? `Your ${dayName}: free ${campus ? 'on campus' : 'between classes'} ${describe(free)}.`
+                : `Your ${dayName}: no free time.`
             }
           />
           <TimeTicks axis={axis} />
@@ -118,12 +121,19 @@ export default function Matches() {
       </section>
 
       <section aria-label={`Matches for ${dayName}`} className="mt-10 lg:mt-0">
-        {busy.length === 0 ? (
-          <Empty>You don't have classes on {dayName}. Pick another day.</Empty>
+        {busy.length === 0 && !campus ? (
+          <Empty>
+            You don't have classes on {dayName}. Pick another day, or add on-campus hours on{' '}
+            <Link to="/schedule" className="text-ink underline underline-offset-4">
+              Schedule
+            </Link>
+            .
+          </Empty>
         ) : free.length === 0 ? (
           <Empty>
-            Your classes on {dayName} don't leave a gap of 30 minutes or more, so there's no free
-            time to match.
+            {campus
+              ? `You don't have 30 free minutes on campus on ${dayName}, so there's no time to match.`
+              : `Your classes on ${dayName} don't leave a gap of 30 minutes or more, so there's no free time to match.`}
           </Empty>
         ) : matches.isPending ? (
           <div>
