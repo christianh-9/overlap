@@ -7,10 +7,12 @@ import {
   formatRange,
   formatTime,
   freeGaps,
+  freeWindows,
   minutesOf,
   parseWindow,
   toMinutes,
   weekdayOf,
+  type Range,
 } from './time'
 
 describe('freeGaps', () => {
@@ -105,5 +107,29 @@ describe('dates', () => {
   it('reads local minutes and date input values', () => {
     expect(minutesOf(new Date(2026, 10, 11, 15, 30))).toBe(930)
     expect(dateInputValue(new Date(2026, 0, 5))).toBe('2026-01-05')
+  })
+})
+
+describe('freeWindows', () => {
+  it('matches freeGaps without hours', () => {
+    const classes: Range[] = [[540, 600], [840, 900]]
+    expect(freeWindows(classes, null, 30)).toEqual(freeGaps(classes, 30))
+  })
+
+  it('counts time before the first and after the last class', () => {
+    expect(freeWindows([[540, 600], [840, 900]], [480, 1020], 30)).toEqual([
+      [480, 540],
+      [600, 840],
+      [900, 1020],
+    ])
+  })
+
+  it('uses the whole window with no classes', () => {
+    expect(freeWindows([], [600, 720], 30)).toEqual([[600, 720]])
+  })
+
+  it('ignores classes outside the window and short pieces', () => {
+    expect(freeWindows([[420, 470], [1100, 1150]], [480, 600], 30)).toEqual([[480, 600]])
+    expect(freeWindows([[500, 600]], [480, 700], 30)).toEqual([[600, 700]])
   })
 })
