@@ -101,6 +101,18 @@ class Enrollment(Base):
     )
 
 
+class CampusHours(Base):
+    __tablename__ = "campus_hours"
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    term: Mapped[str] = mapped_column(String(16), primary_key=True)
+    weekday: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
+    start_time: Mapped[time] = mapped_column(Time)
+    end_time: Mapped[time] = mapped_column(Time)
+
+
 class Block(Base):
     __tablename__ = "blocks"
 

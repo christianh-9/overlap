@@ -77,6 +77,21 @@ export function freeGaps(busy: Range[], minGap: number): Range[] {
   return gaps
 }
 
+// same as free_windows in app/matching.py
+export function freeWindows(busy: Range[], hours: Range | null, minGap: number): Range[] {
+  if (!hours) return freeGaps(busy, minGap)
+  const [start, end] = hours
+  const windows: Range[] = []
+  let cursor = start
+  for (const [classStart, classEnd] of [...busy].sort((a, b) => a[0] - b[0] || a[1] - b[1])) {
+    if (classEnd <= start || classStart >= end) continue
+    if (classStart - cursor >= minGap) windows.push([cursor, classStart])
+    cursor = Math.max(cursor, classEnd)
+  }
+  if (end - cursor >= minGap) windows.push([cursor, end])
+  return windows
+}
+
 const DAY_START = 8 * 60
 const DAY_END = 22 * 60
 

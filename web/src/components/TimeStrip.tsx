@@ -11,6 +11,7 @@ function span(axis: Range, [start, end]: Range) {
 export default function TimeStrip({
   axis,
   busy,
+  campus,
   free = [],
   shared = [],
   now,
@@ -18,6 +19,7 @@ export default function TimeStrip({
 }: {
   axis: Range
   busy: Range[]
+  campus?: Range | null
   free?: Range[]
   shared?: Range[]
   now?: number
@@ -27,6 +29,12 @@ export default function TimeStrip({
 
   return (
     <div role="img" aria-label={summary} className="relative h-11 rounded-md border border-rule bg-card">
+      {campus && (
+        <div
+          className="absolute inset-y-0 border-x border-moss/60 bg-rule/40"
+          style={span(axis, campus)}
+        />
+      )}
       {free.map((range) => (
         <div
           key={range[0]}

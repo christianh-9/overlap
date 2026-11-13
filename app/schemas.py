@@ -1,7 +1,17 @@
 from datetime import datetime, time
 from typing import Literal
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import (
+    AwareDatetime,
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+    model_validator,
+)
+
+from app.config import settings
 
 
 class CodeRequest(BaseModel):
@@ -87,6 +97,27 @@ class CourseOut(BaseModel):
     number: str
     title: str
     meetings: list[MeetingOut]
+
+
+class CampusHoursIn(BaseModel):
+    start_time: time
+    end_time: time
+
+    @model_validator(mode="after")
+    def long_enough(self):
+        start = self.start_time.hour * 60 + self.start_time.minute
+        end = self.end_time.hour * 60 + self.end_time.minute
+        if end - start < settings.min_gap_minutes:
+            raise ValueError(f"must be at least {settings.min_gap_minutes} minutes")
+        return self
+
+
+class CampusHoursOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    weekday: int
+    start_time: time
+    end_time: time
 
 
 class MatchOut(BaseModel):

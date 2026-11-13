@@ -5,6 +5,7 @@ import { toMinutes, type Range } from '../lib/time'
 import type { components } from './schema'
 
 export type Course = components['schemas']['CourseOut']
+export type CampusHours = components['schemas']['CampusHoursOut']
 
 export function useSchedule() {
   return useQuery({
@@ -26,4 +27,16 @@ export function dayRanges(courses: Course[], weekday: number): Range[] {
       .filter((meeting) => meeting.weekday === weekday)
       .map((meeting): Range => [toMinutes(meeting.start_time), toMinutes(meeting.end_time)]),
   )
+}
+
+export function useCampusHours() {
+  return useQuery({
+    queryKey: ['campus-hours'],
+    queryFn: async () => unwrap(await api.GET('/schedule/hours')),
+  })
+}
+
+export function hoursOn(hours: CampusHours[] | undefined, weekday: number): Range | null {
+  const day = hours?.find((h) => h.weekday === weekday)
+  return day ? [toMinutes(day.start_time), toMinutes(day.end_time)] : null
 }

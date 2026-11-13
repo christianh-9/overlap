@@ -1,4 +1,4 @@
-from app.matching import free_gaps, intersect, total_minutes
+from app.matching import free_gaps, free_windows, intersect, total_minutes
 
 
 def test_gaps_only_between_classes():
@@ -29,3 +29,32 @@ def test_intersect():
 
 def test_intersect_respects_minimum():
     assert intersect([(600, 620)], [(600, 700)], 30) == []
+
+
+def test_free_windows_without_hours_matches_free_gaps():
+    classes = [(540, 600), (840, 900)]
+    assert free_windows(classes, None, 30) == free_gaps(classes, 30)
+
+
+def test_free_windows_inside_campus():
+    assert free_windows([(540, 600), (840, 900)], (480, 1020), 30) == [
+        (480, 540),
+        (600, 840),
+        (900, 1020),
+    ]
+
+
+def test_free_windows_no_classes():
+    assert free_windows([], (600, 720), 30) == [(600, 720)]
+
+
+def test_free_windows_ignores_classes_outside_hours():
+    assert free_windows([(420, 470), (1100, 1150)], (480, 600), 30) == [(480, 600)]
+
+
+def test_free_windows_drops_short_pieces():
+    assert free_windows([(500, 600)], (480, 700), 30) == [(600, 700)]
+
+
+def test_free_windows_class_touching_edges():
+    assert free_windows([(480, 540), (660, 720)], (480, 720), 30) == [(540, 660)]
