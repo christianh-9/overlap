@@ -1,15 +1,15 @@
 from collections.abc import Callable
 from dataclasses import asdict
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.anteater import CourseNotFound, SectionData, SourceUnavailable, fetch_section
 from app.auth import current_user
 from app.db import get_db
-from app.models import Course, Enrollment, Meeting, User
-from app.schemas import CourseAdd, CourseOut
+from app.models import CampusHours, Course, Enrollment, Meeting, User
+from app.schemas import CampusHoursIn, CampusHoursOut, CourseAdd, CourseOut
 from app.terms import current_term
 
 router = APIRouter(prefix="/schedule", tags=["schedule"])
@@ -80,3 +80,40 @@ def drop_course(course_id: int, me: User = Depends(current_user), db: Session = 
         raise HTTPException(404, "Not enrolled in that course")
     db.delete(enrollment)
     db.commit()
+
+
+@router.get("/hours", response_model=list[CampusHoursOut])
+def my_hours(me: User = Depends(current_user), db: Session = Depends(get_db)):
+    return db.scalars(
+        select(CampusHours)
+        .where(CampusHours.user_id == me.id, CampusHours.term == current_term())
+        .order_by(CampusHours.weekday)
+    ).all()
+
+
+@router.put("/hours/{weekday}", response_model=CampusHoursOut)
+def set_hours(
+    body: CampusHoursIn,
+    weekday: int = Path(ge=0, le=6),
+    me: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    term = current_term()
+    hours = db.get(CampusHours, (me.id, term, weekday))
+    if hours is None:
+        hours = CampusHours(user_id=me.id, term=term, weekday=weekday)
+        db.add(hours)
+    hours.start_time = body.start_time
+    hours.end_time = body.end_time
+    db.commit()
+    return hours
+
+
+@router.delete("/hours/{weekday}", status_code=204)
+def clear_hours(
+    weekday: int = Path(ge=0, le=6), me: User = Depends(current_user), db: Session = Depends(get_db)
+):
+    hours = db.get(CampusHours, (me.id, current_term(), weekday))
+    if hours is not None:
+        db.delete(hours)
+        db.commit()

@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 from app.auth import current_user
 from app.config import settings
 from app.db import get_db
-from app.matching import fmt, free_gaps, intersect, to_minutes, total_minutes
-from app.models import Block, Course, Enrollment, Meeting, User, Wave
+from app.matching import fmt, free_windows, intersect, to_minutes, total_minutes
+from app.models import Block, CampusHours, Course, Enrollment, Meeting, User, Wave
 from app.schemas import MatchOut, ProfileOut
 from app.terms import current_term
 
@@ -43,7 +43,19 @@ def matches(
     for user_id, start, end in rows:
         day_meetings[user_id].append((to_minutes(start), to_minutes(end)))
 
-    my_gaps = free_gaps(day_meetings.get(me.id, []), settings.min_gap_minutes)
+    hours = {
+        user_id: (to_minutes(start), to_minutes(end))
+        for user_id, start, end in db.execute(
+            select(CampusHours.user_id, CampusHours.start_time, CampusHours.end_time)
+            .join(User, User.id == CampusHours.user_id)
+            .where(
+                User.campus_id == me.campus_id,
+                CampusHours.term == term,
+                CampusHours.weekday == weekday,
+            )
+        )
+    }
+    my_gaps = free_windows(day_meetings.get(me.id, []), hours.get(me.id), settings.min_gap_minutes)
     if not my_gaps:
         return []
 
@@ -51,13 +63,14 @@ def matches(
     blocked |= set(db.scalars(select(Block.blocker_id).where(Block.blocked_id == me.id)))
 
     candidates: dict[int, list[tuple[int, int]]] = {}
-    for user_id, meetings in day_meetings.items():
+    for user_id in day_meetings.keys() | hours.keys():
         if user_id == me.id or user_id in blocked:
             continue
 
-        windows = intersect(
-            my_gaps, free_gaps(meetings, settings.min_gap_minutes), settings.min_overlap_minutes
+        theirs = free_windows(
+            day_meetings.get(user_id, []), hours.get(user_id), settings.min_gap_minutes
         )
+        windows = intersect(my_gaps, theirs, settings.min_overlap_minutes)
         if windows:
             candidates[user_id] = windows
 

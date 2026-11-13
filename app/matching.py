@@ -21,6 +21,25 @@ def free_gaps(meetings: list[Interval], min_gap: int) -> list[Interval]:
     return gaps
 
 
+def free_windows(meetings: list[Interval], hours: Interval | None, min_gap: int) -> list[Interval]:
+    if hours is None:
+        return free_gaps(meetings, min_gap)
+
+    start, end = hours
+    windows: list[Interval] = []
+    cursor = start
+
+    for class_start, class_end in sorted(meetings):
+        if class_end <= start or class_start >= end:
+            continue
+        if class_start - cursor >= min_gap:
+            windows.append((cursor, class_start))
+        cursor = max(cursor, class_end)
+    if end - cursor >= min_gap:
+        windows.append((cursor, end))
+    return windows
+
+
 def intersect(a: list[Interval], b: list[Interval], min_overlap: int) -> list[Interval]:
     out: list[Interval] = []
     i = j = 0
