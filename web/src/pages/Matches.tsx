@@ -5,6 +5,7 @@ import { api } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
 import { useMatches, type Match } from '../api/matches'
 import { dayRanges, scheduleDays, useSchedule } from '../api/schedule'
+import { useTerm } from '../api/term'
 import Avatar from '../components/Avatar'
 import DayPicker from '../components/DayPicker'
 import { LoadError, Loading } from '../components/QueryStatus'
@@ -30,6 +31,7 @@ function describe(ranges: Range[]) {
 
 export default function Matches() {
   const schedule = useSchedule()
+  const term = useTerm().data?.label
   const now = useNow()
   const today = weekdayOf(now)
   const [picked, setPicked] = useState<number | null>(null)
@@ -138,7 +140,8 @@ export default function Matches() {
           />
         ) : matches.data.length === 0 ? (
           <Empty>
-            Nobody else is free during your gaps on {dayName} yet. Check another day, or{' '}
+            Nobody else {term ? `with ${term} classes ` : ''}is free during your gaps on{' '}
+            {dayName} yet. Check another day, or{' '}
             <Link to="/activities" className="text-ink underline underline-offset-4">
               browse meetups
             </Link>
