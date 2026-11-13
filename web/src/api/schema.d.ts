@@ -177,6 +177,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/schedule/hours": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Hours */
+        get: operations["my_hours_schedule_hours_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/schedule/hours/{weekday}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Hours */
+        put: operations["set_hours_schedule_hours__weekday__put"];
+        post?: never;
+        /** Clear Hours */
+        delete: operations["clear_hours_schedule_hours__weekday__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/matches": {
         parameters: {
             query?: never;
@@ -421,6 +456,34 @@ export interface components {
             member_count: number;
             /** Joined */
             joined: boolean;
+        };
+        /** CampusHoursIn */
+        CampusHoursIn: {
+            /**
+             * Start Time
+             * Format: time
+             */
+            start_time: string;
+            /**
+             * End Time
+             * Format: time
+             */
+            end_time: string;
+        };
+        /** CampusHoursOut */
+        CampusHoursOut: {
+            /** Weekday */
+            weekday: number;
+            /**
+             * Start Time
+             * Format: time
+             */
+            start_time: string;
+            /**
+             * End Time
+             * Format: time
+             */
+            end_time: string;
         };
         /** CodeRequest */
         CodeRequest: {
@@ -1004,6 +1067,90 @@ export interface operations {
             header?: never;
             path: {
                 course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_hours_schedule_hours_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampusHoursOut"][];
+                };
+            };
+        };
+    };
+    set_hours_schedule_hours__weekday__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                weekday: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampusHoursIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampusHoursOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clear_hours_schedule_hours__weekday__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                weekday: number;
             };
             cookie?: never;
         };
