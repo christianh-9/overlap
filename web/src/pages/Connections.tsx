@@ -62,7 +62,7 @@ export default function Connections() {
       <div className="mt-8 flex flex-col gap-12 lg:grid lg:grid-cols-2 lg:items-start lg:gap-12">
         <section aria-labelledby="waves-heading">
           <h2 id="waves-heading" className="font-bold">
-            Waves for you{received.data ? ` (${received.data.length})` : ''}
+            Waves for you{received.data?.length ? ` (${received.data.length})` : ''}
           </h2>
           <div className="mt-3">
             {received.isPending ? (
@@ -106,7 +106,7 @@ export default function Connections() {
 
         <section aria-labelledby="connections-heading">
           <h2 id="connections-heading" className="font-bold">
-            Your connections{connections.data ? ` (${connections.data.length})` : ''}
+            Your connections{connections.data?.length ? ` (${connections.data.length})` : ''}
           </h2>
           <div className="mt-3">
             {connections.isPending ? (
