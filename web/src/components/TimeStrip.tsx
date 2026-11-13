@@ -8,9 +8,6 @@ function span(axis: Range, [start, end]: Range) {
   return { left: `${position(axis, start)}%`, width: `${position(axis, end) - position(axis, start)}%` }
 }
 
-// One day drawn to scale: class time hatched, the free gaps between classes
-// outlined, and time shared with another student in highlighter. The drawing is summarized for screen readers, and every page that
-// uses it also lists the same times as text.
 export default function TimeStrip({
   axis,
   busy,

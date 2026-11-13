@@ -24,8 +24,7 @@ api.use({
     return request
   },
   onResponse({ response }) {
-    // A 401 means the token expired or was revoked. A full page load to
-    // sign-in also drops every cached query, so no stale data leaks across users.
+    // token expired, full reload clears the cache
     if (response.status === 401 && location.pathname !== '/sign-in') {
       clearToken()
       location.assign('/sign-in')

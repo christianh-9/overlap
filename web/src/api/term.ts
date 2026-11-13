@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from './client'
 import { unwrap } from './errors'
 
-// The term changes a few times a year, so there's no need to ask often.
 export function useTerm() {
   return useQuery({
     queryKey: ['term'],

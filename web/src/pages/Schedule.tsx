@@ -39,7 +39,6 @@ function summarize(weekday: number, busy: Range[], free: Range[]) {
   return `${day}: ${classes}. ${gaps}`
 }
 
-// "MWF 9:00–9:50am · ICS 174": meetings at the same time and place share a line.
 function groupMeetings(meetings: Course['meetings']) {
   const groups = new Map<string, { days: number[]; range: Range; location: string | null }>()
   for (const meeting of meetings) {

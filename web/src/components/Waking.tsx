@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react'
 
-// The backend runs on a free instance that sleeps when idle, so the first
-// request after a quiet spell can take up to a minute. Only mention it once a
-// request has been slow for a few seconds, so fast responses stay silent.
-// TanStack Query pauses requests while offline instead of failing them, and
-// "paused" says so, since the server isn't the problem then.
+// render's free tier sleeps, first request can take a minute
 export default function Waking({ active, paused = false }: { active: boolean; paused?: boolean }) {
   const [slow, setSlow] = useState(false)
 

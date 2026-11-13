@@ -1,5 +1,3 @@
-// "Leo M." gives "LM", "christianh9" gives "C": first letters of the first
-// and last words, so the circle stays two characters at most.
 export function initials(name: string) {
   const words = name.trim().split(/\s+/).filter(Boolean)
   if (words.length === 0) return ''

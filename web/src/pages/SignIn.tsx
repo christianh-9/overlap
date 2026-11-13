@@ -9,8 +9,7 @@ import Waking from '../components/Waking'
 export default function SignIn() {
   const navigate = useNavigate()
   const location = useLocation()
-  // Read once, then cleared from the history entry: browsers keep router state
-  // across reloads, and the notice should only show the first time.
+  // browsers keep history state on reload
   const [notice] = useState(() => (location.state as { notice?: string } | null)?.notice)
   useEffect(() => {
     if (location.state) navigate(location.pathname, { replace: true, state: null })
@@ -69,7 +68,7 @@ export default function SignIn() {
   const pending = requestCode.isPending || verify.isPending
   const failed = sentTo ? verify.error ?? requestCode.error : requestCode.error
   const error = localError ?? (failed ? errorMessage(failed) : null)
-  // Only present in local dev mode, so codes work without sending email.
+  // dev mode only
   const dev = sentTo ? requestCode.data?.dev_code : null
   const errorText = error && (
     <p id="sign-in-error" role="alert" className="text-danger">
@@ -77,7 +76,7 @@ export default function SignIn() {
     </p>
   )
 
-  // After all hooks, because hooks must run in the same order on every render.
+  // must come after all hooks
   if (getToken()) return <Navigate to="/" replace />
 
   return (
@@ -90,8 +89,6 @@ export default function SignIn() {
       )}
 
       <div className="lg:my-auto lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-center lg:gap-16">
-        {/* Phones drop the intro once the code is sent, to keep the code field
-            near the top. Desktops have room to keep it beside the form. */}
         <section className={sentTo ? 'hidden lg:block' : undefined}>
           <h1 className="mt-10 text-3xl leading-tight font-bold text-balance lg:mt-0 lg:text-5xl">
             See who's free when you are.
@@ -190,7 +187,7 @@ export default function SignIn() {
   )
 }
 
-// Minutes after 8am, on an 8am to 10pm day.
+// minutes after 8am
 const DAY = 14 * 60
 const YOU = [
   [60, 180],
@@ -221,9 +218,6 @@ function Lane({ classes, className }: { classes: number[][]; className?: string 
   )
 }
 
-// A static sketch of how matching works: class time hatched, the gap two people
-// share highlighted. Phones show one lane, desktops show both. It previews the
-// matches page, so screen readers skip it.
 function DayPreview() {
   return (
     <div aria-hidden="true" className="mt-8 flex gap-3 lg:mt-12">

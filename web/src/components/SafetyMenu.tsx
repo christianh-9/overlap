@@ -17,8 +17,6 @@ const REASONS: [Reason, string][] = [
 
 const button = 'h-10 rounded-card px-4 text-sm font-bold disabled:opacity-60'
 
-// Block and report live behind a native <details>, which already handles
-// keyboard and screen reader behavior for show and hide.
 export default function SafetyMenu({
   profile,
   onDone,

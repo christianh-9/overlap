@@ -22,7 +22,6 @@ function profileClass({ isActive }: { isActive: boolean }) {
 
 export default function Layout() {
   const { pathname } = useLocation()
-  // New students finish setting up their profile before the rest of the app.
   const showTabs = Boolean(getToken()) && pathname !== '/setup'
   const waves = useReceivedWaves({ enabled: showTabs }).data?.length ?? 0
 
@@ -34,8 +33,6 @@ export default function Layout() {
         </Link>
         {showTabs && (
           <div className="flex items-center gap-6">
-            {/* One nav for both sizes: a bar fixed to the bottom on phones, within
-                thumb reach, and plain header links from md up. */}
             <nav
               aria-label="Main"
               className="fixed inset-x-0 bottom-0 z-10 flex border-t border-rule bg-card pb-[env(safe-area-inset-bottom)] md:static md:gap-6 md:border-0 md:bg-transparent md:pb-0"
@@ -68,7 +65,6 @@ export default function Layout() {
                 )
               })}
             </nav>
-            {/* Profile is edited rarely, so it sits in the header instead of taking a tab. */}
             <NavLink to="/profile" className={profileClass}>
               Profile
             </NavLink>

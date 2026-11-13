@@ -20,14 +20,11 @@ const HINTS: Record<string, string> = {
   contact: "Instagram, Discord, or a phone number. Only people you've both waved at can see this.",
 }
 
-// Keeps a saved value selectable even if it has since left the list, so
-// opening the form never silently drops it.
+// keep a saved value even if it's no longer listed
 function withSaved(list: string[], saved: string | null) {
   return saved && !list.includes(saved) ? [saved, ...list] : list
 }
 
-// Shared by first-time setup and the Profile page. Each page decides what
-// happens after saving and what sits under the form.
 export default function ProfileForm({
   me,
   title,
@@ -113,7 +110,6 @@ export default function ProfileForm({
 
         <form
           onSubmit={submit}
-          // Any edit after saving makes "Saved." untrue, and change events bubble up here.
           onChange={() => save.isSuccess && save.reset()}
           noValidate
           className="mt-8 flex flex-col gap-6"

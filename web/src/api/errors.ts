@@ -17,9 +17,7 @@ export class ApiError extends Error {
     let message = FALLBACK[status] ?? 'Something went wrong on our end. Try again.'
     let field: string | undefined
 
-    // The backend writes its own error text for people to read, so prefer it.
-    // Validation errors are the exception: Pydantic's wording is technical,
-    // so name the field instead.
+    // backend messages are readable, pydantic's aren't
     if (typeof detail === 'string') {
       message = detail
     } else if (Array.isArray(detail) && detail.length > 0) {

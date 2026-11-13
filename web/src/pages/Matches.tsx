@@ -191,11 +191,9 @@ function MatchList({
       queryClient.setQueryData<Match[]>(['matches', day], (old) =>
         old?.map((m) => (m.profile.id === match.profile.id ? { ...m, waved: !match.waved } : m)),
       )
-      // The same person can match on other days too, so those lists are now out of date.
       queryClient.invalidateQueries({ queryKey: ['matches'], refetchType: 'none' })
-      // A wave can complete a connection or answer one waiting on Connections.
       queryClient.invalidateQueries({ queryKey: ['waves'] })
-      // Names often end in an initial ("Leo M."), so they never end a sentence here.
+      // names like "Leo M." already end in a period
       const name = match.profile.display_name
       setNotice(
         match.waved
@@ -219,7 +217,7 @@ function MatchList({
   const windowsFor = (match: Match) => match.windows.map(parseWindow)
   const isFreeNow = (match: Match) =>
     now !== undefined && windowsFor(match).some(([start, end]) => now >= start && now < end)
-  // Keep the backend's order (shared classes first), but anyone free right now comes first.
+  // free now first
   const ordered = [...matches].sort((a, b) => Number(isFreeNow(b)) - Number(isFreeNow(a)))
 
   return (

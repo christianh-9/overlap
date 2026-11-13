@@ -115,7 +115,6 @@ function ActivitiesView({ activities, myId }: { activities: Activity[]; myId: nu
       update((old) => old.filter((a) => a.id !== activity.id))
       setConfirming(null)
       setNotice(`Cancelled ${activity.title}.`)
-      // The card and its buttons are gone, so give focus somewhere that explains why.
       statusRef.current?.focus()
     },
     onError: (error) => setNotice(errorMessage(error)),
@@ -125,7 +124,6 @@ function ActivitiesView({ activities, myId }: { activities: Activity[]; myId: nu
     [join, leave, cancel].filter((m) => m.isPending).map((m) => m.variables?.id),
   )
 
-  // Starts inside one of your free gaps that weekday: the same gaps matching uses.
   const duringFreeTime = (activity: Activity) => {
     if (!schedule.data) return false
     const start = new Date(activity.starts_at)
@@ -368,7 +366,7 @@ function PostForm({ now, onPosted }: { now: Date; onPosted: (activity: Activity)
     const errors: Partial<Record<Field, string>> = {}
     if (!title.trim()) errors.title = 'Say what the meetup is.'
     if (!location.trim()) errors.location = 'Say where to meet.'
-    // Date and time inputs give local values, so this Date is in local time.
+    // local time
     const startsAt = new Date(`${date}T${time}`)
     const ahead = startsAt.getTime() - Date.now()
     if (!date || !time || Number.isNaN(ahead)) errors.starts_at = 'Pick a day and time.'

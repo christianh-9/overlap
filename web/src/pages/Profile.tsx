@@ -120,7 +120,6 @@ function BlockedPeople() {
       queryClient.setQueryData<Person[]>(['blocks'], (old = []) =>
         old.filter((p) => p.id !== person.id),
       )
-      // They can show up again in matches, waves, and meetups.
       for (const key of ['matches', 'waves', 'activities']) {
         queryClient.invalidateQueries({ queryKey: [key], refetchType: 'none' })
       }
@@ -184,7 +183,6 @@ function DeleteAccount({ email }: { email: string }) {
   const wasOpen = useRef(false)
   const matches = typed.trim().toLowerCase() === email.toLowerCase()
 
-  // Cancel hides the confirmation, so focus goes back to the button that opened it.
   useEffect(() => {
     if (wasOpen.current && !open) openRef.current?.focus()
     wasOpen.current = open

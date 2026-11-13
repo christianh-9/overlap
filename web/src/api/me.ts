@@ -10,13 +10,9 @@ export function useMe() {
   })
 }
 
-// Clears every cached query too, so nothing from this account shows if someone
-// else signs in on the same device.
 export function useSignOut() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
-  // A notice, like "Your account was deleted.", rides along in router state for
-  // sign-in to show once.
   return (notice?: string) => {
     clearToken()
     queryClient.clear()

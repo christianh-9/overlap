@@ -13,7 +13,6 @@ export function useSchedule() {
   })
 }
 
-// Weekdays always, plus Saturday or Sunday only when a class meets then.
 export function scheduleDays(courses: Course[]) {
   const weekend = [5, 6].filter((day) =>
     courses.some((course) => course.meetings.some((meeting) => meeting.weekday === day)),

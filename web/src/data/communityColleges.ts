@@ -1,6 +1,4 @@
-// The 116 credit colleges in the California Community Colleges system, by
-// official name. Picking from a list keeps spellings identical, which matters
-// because matching compares colleges by exact name.
+// california community colleges, official names
 export const COMMUNITY_COLLEGES = [
   'Allan Hancock College',
   'American River College',

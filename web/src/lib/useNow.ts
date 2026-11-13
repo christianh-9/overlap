@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 
-// Re-renders once a minute so anything drawn at "now" keeps up with the clock.
 export function useNow() {
   const [now, setNow] = useState(() => new Date())
 

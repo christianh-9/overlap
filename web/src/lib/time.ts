@@ -1,5 +1,4 @@
-// Times are minutes after midnight throughout, which keeps comparisons and
-// widths simple. The API weekday counts from Monday = 0.
+// times are minutes after midnight, weekdays start at monday = 0
 
 export type Range = [start: number, end: number]
 
@@ -12,7 +11,7 @@ export function toMinutes(time: string) {
   return hours * 60 + minutes
 }
 
-// The matches API sends shared windows as "10:00-12:00" on a 24-hour clock.
+// e.g. "10:00-12:00"
 export function parseWindow(window: string): Range {
   const [start, end] = window.split('-')
   return [toMinutes(start), toMinutes(end)]
@@ -25,7 +24,7 @@ export function formatDuration(minutes: number) {
   return rest === 0 ? `${hours}h` : `${hours}h ${rest}m`
 }
 
-// JavaScript counts weekdays from Sunday = 0; the API counts from Monday = 0.
+// js weeks start on sunday
 export function weekdayOf(date: Date) {
   return (date.getDay() + 6) % 7
 }
@@ -34,14 +33,12 @@ export function minutesOf(date: Date) {
   return date.getHours() * 60 + date.getMinutes()
 }
 
-// "2026-11-11" in local time, the format date inputs use.
 export function dateInputValue(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${date.getFullYear()}-${month}-${day}`
 }
 
-// "Today", "Tomorrow", or "Wednesday, Nov 11", by calendar day in local time.
 export function dayHeading(date: Date, now: Date) {
   const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
   const days = Math.round((startOf(date) - startOf(now)) / 86_400_000)
@@ -63,15 +60,13 @@ export function formatTime(minutes: number) {
   return clock(minutes) + half(minutes)
 }
 
-// "9:30–10:50am", or "11:00am–12:20pm" when the range crosses noon.
 export function formatRange(start: number, end: number) {
   return half(start) === half(end)
     ? `${clock(start)}–${formatTime(end)}`
     : `${formatTime(start)}–${formatTime(end)}`
 }
 
-// Mirrors free_gaps in app/matching.py, so the gaps shown on the schedule are
-// exactly the ones matching uses: only time between classes counts.
+// same as free_gaps in app/matching.py
 export function freeGaps(busy: Range[], minGap: number): Range[] {
   const gaps: Range[] = []
   let busyUntil: number | null = null
@@ -85,7 +80,6 @@ export function freeGaps(busy: Range[], minGap: number): Range[] {
 const DAY_START = 8 * 60
 const DAY_END = 22 * 60
 
-// 8am to 10pm, widened to the hour around anything that falls outside it.
 export function axisFor(ranges: Range[]): Range {
   const starts = ranges.map(([start]) => Math.floor(start / 60) * 60)
   const ends = ranges.map(([, end]) => Math.ceil(end / 60) * 60)

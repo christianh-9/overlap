@@ -1,6 +1,4 @@
-// UCI undergraduate majors, from Anteater API by ICSSC (/v2/rest/programs/majors),
-// 2026-2027 catalog. B.A. and B.S. versions of the same major are merged, since
-// matching compares majors by name. Regenerate when the catalog year changes.
+// from anteater api, 2026-2027 catalog
 export const MAJORS = [
   'Aerospace Engineering',
   'African-American Studies',

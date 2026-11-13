@@ -9,8 +9,7 @@ import './index.css'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // A 4xx means the request itself was wrong, so asking again won't help.
-      // Network errors and 5xx can be a server waking up, so try twice more.
+      // 4xx won't fix itself, 5xx may be render waking up
       retry: (failures, error) =>
         !(error instanceof ApiError && error.status < 500) && failures < 2,
     },

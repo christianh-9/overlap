@@ -24,11 +24,10 @@ export default function Connections() {
       queryClient.setQueryData<Profile[]>(['waves', 'received'], (old = []) =>
         old.filter((p) => p.id !== profile.id),
       )
-      // The wave response doesn't include their contact, so fetch the list again.
+      // wave response has no contact
       queryClient.invalidateQueries({ queryKey: ['waves', 'connections'] })
       queryClient.invalidateQueries({ queryKey: ['matches'], refetchType: 'none' })
       setNotice(`You and ${profile.display_name} are connected. Their contact is in your connections.`)
-      // The button that had focus is gone with the card.
       statusRef.current?.focus()
     },
     onError: (error) => setNotice(errorMessage(error)),
@@ -42,7 +41,6 @@ export default function Connections() {
       queryClient.setQueryData<Connection[]>(['waves', 'connections'], (old = []) =>
         old.filter((c) => c.profile.id !== profile.id),
       )
-      // Blocking hides them everywhere, so those lists are out of date too.
       queryClient.invalidateQueries({ queryKey: ['matches'], refetchType: 'none' })
       queryClient.invalidateQueries({ queryKey: ['activities'], refetchType: 'none' })
       queryClient.invalidateQueries({ queryKey: ['blocks'], refetchType: 'none' })
@@ -190,7 +188,6 @@ function Contact({ connection }: { connection: Connection }) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      // Clipboard access can be refused; the handle stays selectable to copy by hand.
     }
   }
 
