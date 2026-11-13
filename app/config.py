@@ -20,7 +20,10 @@ class Settings(BaseSettings):
     resend_api_key: str = ""
     email_from: str = "Overlap <onboarding@resend.dev>"
 
-    cors_origin: list[str] = ["https://localhost:5173"]
+    cors_origin: list[str] = ["http://localhost:5173"]
+    # Matches Vercel preview addresses, so PR previews can reach the API. Unset
+    # means previews are refused. Set on the server, not in code.
+    cors_origin_regex: str | None = None
 
     @field_validator("database_url")
     @classmethod
