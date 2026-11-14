@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { api } from '../api/client'
 import { ApiError, errorMessage, unwrap } from '../api/errors'
 import type { components } from '../api/schema'
@@ -71,6 +71,38 @@ export default function ProfileForm({
     },
   })
 
+  const photo = useMutation({
+    mutationFn: async (file: File | null) => {
+      if (!file) {
+        unwrap(await api.DELETE('/me/photo'))
+        return null
+      }
+      const saved = unwrap(
+        await api.PUT('/me/photo', {
+          // the generated type says string, the server wants the file
+          body: { file: file as unknown as string },
+          bodySerializer: (body) => {
+            const form = new FormData()
+            form.append('file', body.file)
+            return form
+          },
+        }),
+      )
+      return saved.photo_url
+    },
+    onSuccess: (photoUrl) => {
+      queryClient.setQueryData<Me>(['me'], (old) => old && { ...old, photo_url: photoUrl })
+      queryClient.invalidateQueries({ queryKey: ['activities'] })
+    },
+  })
+
+  function choosePhoto(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    // so picking the same file again still fires
+    event.target.value = ''
+    if (file) photo.mutate(file)
+  }
+
   function submit(event: FormEvent) {
     event.preventDefault()
     if (!name.trim()) {
@@ -107,6 +139,47 @@ export default function ProfileForm({
       <section>
         <h1 className="text-3xl leading-tight font-bold text-balance">{title}</h1>
         <p className="mt-2 text-moss">{intro}</p>
+
+        <div className="mt-8 flex items-center gap-4">
+          <Avatar id={me.id} name={name || '?'} photoUrl={me.photo_url} size="lg" />
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="flex flex-wrap gap-2">
+              <label
+                className={`flex h-10 items-center rounded-card border border-rule px-4 text-sm font-bold has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink ${photo.isPending ? 'opacity-60' : 'cursor-pointer'}`}
+              >
+                {photo.isPending && photo.variables
+                  ? 'Uploading...'
+                  : me.photo_url
+                    ? 'Change photo'
+                    : 'Upload photo'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={photo.isPending}
+                  onChange={choosePhoto}
+                  className="sr-only"
+                />
+              </label>
+              {me.photo_url && (
+                <button
+                  type="button"
+                  onClick={() => photo.mutate(null)}
+                  disabled={photo.isPending}
+                  className="h-10 rounded-card border border-rule px-4 text-sm font-bold disabled:opacity-60"
+                >
+                  {photo.isPending && !photo.variables ? 'Removing...' : 'Remove photo'}
+                </button>
+              )}
+            </div>
+            <p className="text-sm text-moss">Optional. Everyone on Overlap can see it.</p>
+          </div>
+        </div>
+        {photo.error && (
+          <p role="alert" className="mt-3 text-danger">
+            {errorMessage(photo.error)}
+          </p>
+        )}
+        <Waking active={photo.isPending} paused={photo.isPaused} />
 
         <form
           onSubmit={submit}
@@ -241,6 +314,7 @@ export default function ProfileForm({
         <p className="text-sm font-bold text-moss">How others see you</p>
         <ProfilePreview
           id={me.id}
+          photoUrl={me.photo_url}
           name={name.trim()}
           major={major}
           gradYear={gradYear}
@@ -286,6 +360,7 @@ function Field({
 
 function ProfilePreview({
   id,
+  photoUrl,
   name,
   major,
   gradYear,
@@ -294,6 +369,7 @@ function ProfilePreview({
   contact,
 }: {
   id: number
+  photoUrl: string | null
   name: string
   major: string
   gradYear: string
@@ -306,7 +382,7 @@ function ProfilePreview({
   return (
     <div className="mt-3 rounded-card border border-rule bg-card p-5">
       <div className="flex items-center gap-3">
-        <Avatar id={id} name={name || '?'} />
+        <Avatar id={id} name={name || '?'} photoUrl={photoUrl} />
         <div className="min-w-0">
           <p className={`text-lg font-bold ${name ? '' : 'text-moss'}`}>{name || 'Your name'}</p>
           <p className="text-sm text-moss">{details || 'Major and graduation year'}</p>

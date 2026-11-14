@@ -42,6 +42,7 @@ class User(Base):
     bio: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     campus: Mapped[Campus] = relationship()
+    photo_key: Mapped[str | None] = mapped_column(String(64))
 
 
 class LoginCode(Base):

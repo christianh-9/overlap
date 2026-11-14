@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
 
 from app.auth import current_user
 from app.db import get_db
 from app.models import Block, LoginCode, Report, User
+from app.photos import MAX_BYTES, NotAnImage, Storage, get_storage, new_key, process
 from app.schemas import MeOut, ProfileOut, ProfileUpdate, ReportIn
 
 router = APIRouter(tags=["profiles"])
@@ -39,10 +40,58 @@ def update_me(body: ProfileUpdate, me: User = Depends(current_user), db: Session
 
 
 @router.delete("/me", status_code=204)
-def delete_me(me: User = Depends(current_user), db: Session = Depends(get_db)):
+def delete_me(
+    me: User = Depends(current_user),
+    db: Session = Depends(get_db),
+    storage: Storage | None = Depends(get_storage),
+):
+    photo = me.photo_key
     db.execute(delete(LoginCode).where(LoginCode.email == me.email))
     db.delete(me)
     db.commit()
+    if photo and storage:
+        storage.delete(photo)
+
+
+@router.put("/me/photo", response_model=MeOut)
+def set_photo(
+    file: UploadFile = File(...),
+    me: User = Depends(current_user),
+    db: Session = Depends(get_db),
+    storage: Storage | None = Depends(get_storage),
+):
+    if storage is None:
+        raise HTTPException(503, "Photo uploads aren't set up")
+    data = file.file.read(MAX_BYTES + 1)
+    if len(data) > MAX_BYTES:
+        raise HTTPException(413, "Photos can be up to 5 MB")
+    try:
+        photo = process(data)
+    except NotAnImage:
+        raise HTTPException(422, "That file isn't an image") from None
+    key = new_key()
+    storage.put(key, photo)
+    old = me.photo_key
+    me.photo_key = key
+    db.commit()
+    if old:
+        storage.delete(old)
+    return me
+
+
+@router.delete("/me/photo", status_code=204)
+def remove_photo(
+    me: User = Depends(current_user),
+    db: Session = Depends(get_db),
+    storage: Storage | None = Depends(get_storage),
+):
+    old = me.photo_key
+    if old is None:
+        return
+    me.photo_key = None
+    db.commit()
+    if storage:
+        storage.delete(old)
 
 
 @router.get("/users/{user_id}", response_model=ProfileOut)

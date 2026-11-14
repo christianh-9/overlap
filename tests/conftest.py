@@ -16,6 +16,7 @@ from app.anteater import CourseNotFound, MeetingData, SectionData
 from app.db import Base, engine
 from app.email import get_mailer
 from app.main import app
+from app.photos import get_storage
 from app.routers.schedule import get_fetcher
 
 
@@ -55,14 +56,31 @@ def outbox():
 
 
 @pytest.fixture
-def client(outbox):
+def client(outbox, storage):
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     app.dependency_overrides[get_fetcher] = lambda: fake_fetch
     app.dependency_overrides[get_mailer] = lambda: lambda to, code: outbox.append((to, code))
+    app.dependency_overrides[get_storage] = lambda: storage
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+
+
+class FakeStorage:
+    def __init__(self):
+        self.files = {}
+
+    def put(self, key, data):
+        self.files[key] = data
+
+    def delete(self, key):
+        self.files.pop(key, None)
+
+
+@pytest.fixture
+def storage():
+    return FakeStorage()
 
 
 @pytest.fixture
