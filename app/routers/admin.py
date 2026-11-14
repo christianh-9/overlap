@@ -6,6 +6,7 @@ from app.auth import current_user
 from app.config import settings
 from app.db import get_db
 from app.models import BannedEmail, Report, User
+from app.photos import Storage, get_storage
 from app.schemas import ReportOut, ResolveIn
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -28,14 +29,24 @@ def list_reports(
 
 @router.post("/reports/{report_id}/resolve", response_model=ReportOut)
 def resolve_report(
-    report_id: int, body: ResolveIn, _: User = Depends(require_admin), db: Session = Depends(get_db)
+    report_id: int,
+    body: ResolveIn,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+    storage: Storage | None = Depends(get_storage),
 ):
     report = db.get(Report, report_id)
     if report is None:
         raise HTTPException(404, "Report not found")
+    reported = db.get(User, report.reported_id) if report.reported_id else None
+    old_photo = None
 
     if body.action == "dismiss":
         report.status = "dismissed"
+    elif body.action == "remove_photo":
+        report.status = "photo_removed"
+        if reported:
+            old_photo, reported.photo_key = reported.photo_key, None
     else:
         db.execute(
             update(Report)
@@ -44,8 +55,11 @@ def resolve_report(
         )
         if db.get(BannedEmail, report.reported_email) is None:
             db.add(BannedEmail(email=report.reported_email))
-        if report.reported_id is not None and (user := db.get(User, report.reported_id)):
-            db.delete(user)
+        if reported:
+            old_photo = reported.photo_key
+            db.delete(reported)
     db.commit()
+    if old_photo and storage:
+        storage.delete(old_photo)
     db.refresh(report)
     return report

@@ -188,4 +188,4 @@ class ReportOut(BaseModel):
 
 
 class ResolveIn(BaseModel):
-    action: Literal["dismiss", "ban"]
+    action: Literal["dismiss", "remove_photo", "ban"]

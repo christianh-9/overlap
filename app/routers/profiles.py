@@ -40,10 +40,19 @@ def update_me(body: ProfileUpdate, me: User = Depends(current_user), db: Session
 
 
 @router.delete("/me", status_code=204)
-def delete_me(me: User = Depends(current_user), db: Session = Depends(get_db)):
+def delete_me(
+    me: User = Depends(current_user),
+    db: Session = Depends(get_db),
+    storage: Storage | None = Depends(get_storage),
+):
+    photo = me.photo_key
     db.execute(delete(LoginCode).where(LoginCode.email == me.email))
     db.delete(me)
     db.commit()
+    if photo and storage:
+        storage.delete(photo)
+
+
 @router.put("/me/photo", response_model=MeOut)
 def set_photo(
     file: UploadFile = File(...),

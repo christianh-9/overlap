@@ -70,3 +70,42 @@ def test_uploads_off_without_a_bucket(client, login):
     app.dependency_overrides[get_storage] = lambda: None
     alice = login("alice@uci.edu")
     assert upload(client, alice, jpeg()).status_code == 503
+
+
+def resolve(client, reporter, admin, user_id, action):
+    client.post(f"/users/{user_id}/report", headers=reporter, json={"reason": "inappropriate"})
+    report_id = client.get("/admin/reports", headers=admin).json()[0]["id"]
+    return client.post(
+        f"/admin/reports/{report_id}/resolve", headers=admin, json={"action": action}
+    )
+
+
+def test_deleting_account_removes_photo(client, login, storage):
+    alice = login("alice@uci.edu")
+    upload(client, alice, jpeg())
+    assert client.delete("/me", headers=alice).status_code == 204
+    assert storage.files == {}
+
+
+def test_ban_removes_photo(client, login, storage):
+    alice = login("alice@uci.edu")
+    bob = login("bob@uci.edu")
+    admin = login("admin@uci.edu")
+    bob_id = client.get("/me", headers=bob).json()["id"]
+    upload(client, bob, jpeg())
+
+    assert resolve(client, alice, admin, bob_id, "ban").json()["status"] == "banned"
+    assert storage.files == {}
+
+
+def test_admin_can_remove_just_the_photo(client, login, storage):
+    alice = login("alice@uci.edu")
+    bob = login("bob@uci.edu")
+    admin = login("admin@uci.edu")
+    bob_id = client.get("/me", headers=bob).json()["id"]
+    upload(client, bob, jpeg())
+
+    r = resolve(client, alice, admin, bob_id, "remove_photo")
+    assert r.json()["status"] == "photo_removed"
+    assert storage.files == {}
+    assert client.get("/me", headers=bob).json()["photo_url"] is None
