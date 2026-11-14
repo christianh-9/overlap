@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     admin_emails: list[str] = []
     resend_api_key: str = ""
     email_from: str = "Overlap <onboarding@resend.dev>"
+    aws_access_key_id: str = ""
+    aws_secret_access_key: str = ""
+    aws_region: str = "us-east-2"
+    photo_bucket: str = ""
 
     cors_origin: list[str] = ["http://localhost:5173"]
     cors_origin_regex: str | None = None

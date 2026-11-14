@@ -7,11 +7,13 @@ from pydantic import (
     ConfigDict,
     EmailStr,
     Field,
+    computed_field,
     field_validator,
     model_validator,
 )
 
 from app.config import settings
+from app.photos import photo_url
 
 
 class CodeRequest(BaseModel):
@@ -43,6 +45,12 @@ class ProfileOut(BaseModel):
     is_transfer: bool
     transfer_from: str | None
     bio: str
+    photo_key: str | None = Field(None, exclude=True)
+
+    @computed_field
+    @property
+    def photo_url(self) -> str | None:
+        return photo_url(self.photo_key)
 
 
 class MeOut(ProfileOut):
