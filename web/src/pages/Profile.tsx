@@ -154,7 +154,7 @@ function BlockedPeople() {
             return (
               <li key={person.id} className="flex items-center justify-between gap-3 py-3">
                 <span className="flex min-w-0 items-center gap-3">
-                  <Avatar id={person.id} name={person.display_name} size="sm" />
+                  <Avatar id={person.id} name={person.display_name} photoUrl={person.photo_url} size="sm" />
                   <span className="truncate font-bold">{person.display_name}</span>
                 </span>
                 <button

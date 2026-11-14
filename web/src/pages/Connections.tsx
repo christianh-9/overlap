@@ -156,7 +156,7 @@ function PersonCard({ profile, children }: { profile: Profile; children: ReactNo
   return (
     <li className="rounded-card border border-rule bg-card p-5">
       <div className="flex items-center gap-3">
-        <Avatar id={profile.id} name={profile.display_name} />
+        <Avatar id={profile.id} name={profile.display_name} photoUrl={profile.photo_url} />
         <div className="min-w-0">
           <h3 className="text-lg font-bold">{profile.display_name}</h3>
           {details && <p className="text-sm text-moss">{details}</p>}

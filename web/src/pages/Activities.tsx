@@ -255,7 +255,12 @@ function ActivityCard({
           <h3 className="font-bold break-words">{activity.title}</h3>
           <p className="text-sm break-words">{activity.location}</p>
           <p className="mt-1.5 flex items-center gap-2 text-sm text-moss">
-            <Avatar id={activity.creator.id} name={activity.creator.display_name} size="sm" />
+            <Avatar
+              id={activity.creator.id}
+              name={activity.creator.display_name}
+              photoUrl={activity.creator.photo_url}
+              size="sm"
+            />
             {mine ? 'Posted by you' : `Posted by ${activity.creator.display_name}`}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">

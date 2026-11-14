@@ -57,6 +57,24 @@ export interface paths {
         patch: operations["update_me_me_patch"];
         trace?: never;
     };
+    "/me/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Photo */
+        put: operations["set_photo_me_photo_put"];
+        post?: never;
+        /** Remove Photo */
+        delete: operations["remove_photo_me_photo_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/{user_id}": {
         parameters: {
             query?: never;
@@ -457,6 +475,11 @@ export interface components {
             /** Joined */
             joined: boolean;
         };
+        /** Body_set_photo_me_photo_put */
+        Body_set_photo_me_photo_put: {
+            /** File */
+            file: string;
+        };
         /** CampusHoursIn */
         CampusHoursIn: {
             /**
@@ -581,6 +604,8 @@ export interface components {
             home_city: string | null;
             /** Contact */
             contact: string | null;
+            /** Photo Url */
+            readonly photo_url: string | null;
         };
         /** MeetingOut */
         MeetingOut: {
@@ -615,6 +640,8 @@ export interface components {
             transfer_from: string | null;
             /** Bio */
             bio: string;
+            /** Photo Url */
+            readonly photo_url: string | null;
         };
         /** ProfileUpdate */
         ProfileUpdate: {
@@ -681,7 +708,7 @@ export interface components {
              * Action
              * @enum {string}
              */
-            action: "dismiss" | "ban";
+            action: "dismiss" | "remove_photo" | "ban";
         };
         /** TermOut */
         TermOut: {
@@ -861,6 +888,57 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    set_photo_me_photo_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_set_photo_me_photo_put"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_photo_me_photo_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
