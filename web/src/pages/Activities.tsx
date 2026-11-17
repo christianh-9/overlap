@@ -9,6 +9,7 @@ import Avatar from '../components/Avatar'
 import { LoadError, Loading } from '../components/QueryStatus'
 import SubmitButton from '../components/SubmitButton'
 import Waking from '../components/Waking'
+import { campusInfo } from '../data/campuses'
 import {
   dateInputValue,
   dayHeading,
@@ -48,10 +49,24 @@ export default function Activities() {
       <LoadError title="Couldn't load your profile" error={me.error} onRetry={() => me.refetch()} />
     )
   }
-  return <ActivitiesView activities={activities.data} myId={me.data.id} />
+  return (
+    <ActivitiesView
+      activities={activities.data}
+      myId={me.data.id}
+      school={campusInfo(me.data.campus).short}
+    />
+  )
 }
 
-function ActivitiesView({ activities, myId }: { activities: Activity[]; myId: number }) {
+function ActivitiesView({
+  activities,
+  myId,
+  school,
+}: {
+  activities: Activity[]
+  myId: number
+  school: string
+}) {
   const queryClient = useQueryClient()
   const schedule = useSchedule()
   const campusHours = useCampusHours().data
@@ -157,7 +172,7 @@ function ActivitiesView({ activities, myId }: { activities: Activity[]; myId: nu
             {formOpen ? 'Close' : 'Post a meetup'}
           </button>
         </div>
-        <p className="mt-2 text-moss">Small meetups at UCI, soonest first.</p>
+        <p className="mt-2 text-moss">Small meetups at {school}, soonest first.</p>
 
         <div id="post-meetup" className={`${formOpen ? '' : 'hidden'} mt-6 lg:block`}>
           <h2 id="post-heading" className="font-bold">
