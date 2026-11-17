@@ -35,6 +35,13 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 
+class CampusOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    slug: str
+    name: str
+
+
 class ProfileOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -57,6 +64,7 @@ class MeOut(ProfileOut):
     email: str
     home_city: str | None
     contact: str | None
+    campus: CampusOut
 
 
 class ProfileUpdate(BaseModel):

@@ -108,3 +108,8 @@ def test_each_campus_gets_its_own_lookup():
 
     assert get_fetcher(user("uci")) is anteater.fetch_section
     assert get_fetcher(user("ucr")) is ucr.fetch_section
+
+
+def test_me_includes_the_campus(client, login):
+    alice = login("alice@uci.edu")
+    assert client.get("/me", headers=alice).json()["campus"] == {"slug": "uci", "name": "UC Irvine"}

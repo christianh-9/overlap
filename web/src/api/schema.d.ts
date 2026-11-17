@@ -508,6 +508,13 @@ export interface components {
              */
             end_time: string;
         };
+        /** CampusOut */
+        CampusOut: {
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+        };
         /** CodeRequest */
         CodeRequest: {
             /**
@@ -604,6 +611,7 @@ export interface components {
             home_city: string | null;
             /** Contact */
             contact: string | null;
+            campus: components["schemas"]["CampusOut"];
             /** Photo Url */
             readonly photo_url: string | null;
         };
