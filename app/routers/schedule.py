@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.anteater import CourseNotFound, SectionData, SourceUnavailable, fetch_section
+from app import anteater, ucr
+from app.anteater import CourseNotFound, SectionData, SourceUnavailable
 from app.auth import current_user
 from app.db import get_db
 from app.models import CampusHours, Course, Enrollment, Meeting, User
@@ -16,9 +17,11 @@ router = APIRouter(prefix="/schedule", tags=["schedule"])
 
 Fetcher = Callable[[str, str], SectionData]
 
+FETCHERS: dict[str, Fetcher] = {"uci": anteater.fetch_section, "ucr": ucr.fetch_section}
 
-def get_fetcher() -> Fetcher:
-    return fetch_section
+
+def get_fetcher(me: User = Depends(current_user)) -> Fetcher:
+    return FETCHERS[me.campus.slug]
 
 
 @router.get("", response_model=list[CourseOut])
@@ -53,7 +56,7 @@ def add_course(
         except CourseNotFound:
             raise HTTPException(404, f"No section {body.course_code} this term") from None
         except SourceUnavailable:
-            raise HTTPException(502, "UCI schedule unavailable, try again") from None
+            raise HTTPException(502, f"{me.campus.name} schedule unavailable, try again") from None
         course = Course(
             campus_id=me.campus_id,
             term=term,

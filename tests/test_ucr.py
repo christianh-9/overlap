@@ -1,10 +1,12 @@
 from datetime import time
+from types import SimpleNamespace
 
 import httpx
 import pytest
 
-from app import ucr
+from app import anteater, ucr
 from app.anteater import CourseNotFound
+from app.routers.schedule import get_fetcher
 from app.ucr import banner_term, parse_details, parse_meetings
 
 MEETINGS = {
@@ -97,3 +99,12 @@ def test_unknown_crn(monkeypatch):
     fake_http(monkeypatch, details_status=500)
     with pytest.raises(CourseNotFound):
         ucr.fetch_section("2026-fall", "99999")
+
+
+def test_each_campus_gets_its_own_lookup():
+
+    def user(slug):
+        return SimpleNamespace(campus=SimpleNamespace(slug=slug))
+
+    assert get_fetcher(user("uci")) is anteater.fetch_section
+    assert get_fetcher(user("ucr")) is ucr.fetch_section
