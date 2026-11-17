@@ -7,6 +7,7 @@ import type { Profile as Person } from '../api/waves'
 import Avatar from '../components/Avatar'
 import ProfileForm from '../components/ProfileForm'
 import { LoadError, Loading } from '../components/QueryStatus'
+import { campusInfo } from '../data/campuses'
 
 const ANTEATER_API = 'https://docs.icssc.club/docs/developer/anteaterapi'
 const ICSSC = 'https://studentcouncil.ics.uci.edu/'
@@ -51,8 +52,9 @@ export default function Profile() {
       <Section title="About Overlap">
         <div className="flex flex-col gap-3 text-moss">
           <p>
-            Overlap shows you other UCI students whose free time between classes lines up with
-            yours, so you can meet through mutual waves and small meetups.
+            Overlap shows you other {campusInfo(me.data.campus).short} students whose free time
+            between classes lines up with yours, so you can meet through mutual waves and small
+            meetups.
           </p>
           <ul className="flex list-disc flex-col gap-1 pl-5">
             <li>Your profile is shown to students whose gaps overlap yours.</li>
@@ -63,20 +65,24 @@ export default function Profile() {
             If someone makes you uncomfortable, use More on their card in Connections to block or
             report them.
           </p>
+          {me.data.campus.slug === 'uci' ? (
+            <p>
+              Course and schedule data comes from{' '}
+              <a href={ANTEATER_API} target="_blank" rel="noreferrer" className={link}>
+                Anteater API
+              </a>{' '}
+              by{' '}
+              <a href={ICSSC} target="_blank" rel="noreferrer" className={link}>
+                ICSSC
+              </a>
+              , the ICS Student Council.
+            </p>
+          ) : (
+            <p>Course and schedule data comes from the {me.data.campus.name} Schedule of Classes.</p>
+          )}
           <p>
-            Course and schedule data comes from{' '}
-            <a href={ANTEATER_API} target="_blank" rel="noreferrer" className={link}>
-              Anteater API
-            </a>{' '}
-            by{' '}
-            <a href={ICSSC} target="_blank" rel="noreferrer" className={link}>
-              ICSSC
-            </a>
-            , the ICS Student Council.
-          </p>
-          <p>
-            Overlap is an independent student project. It isn't affiliated with or endorsed by UC
-            Irvine.
+            Overlap is an independent student project. It isn't affiliated with or endorsed by{' '}
+            {me.data.campus.name}.
           </p>
         </div>
       </Section>

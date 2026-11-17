@@ -3,8 +3,8 @@ import { useState, type ChangeEvent, type FormEvent, type ReactNode } from 'reac
 import { api } from '../api/client'
 import { ApiError, errorMessage, unwrap } from '../api/errors'
 import type { components } from '../api/schema'
+import { campusInfo } from '../data/campuses'
 import { COMMUNITY_COLLEGES } from '../data/communityColleges'
-import { MAJORS } from '../data/majors'
 import Avatar from './Avatar'
 import SubmitButton from './SubmitButton'
 import Waking from './Waking'
@@ -41,6 +41,7 @@ export default function ProfileForm({
   children?: ReactNode
 }) {
   const queryClient = useQueryClient()
+  const campus = campusInfo(me.campus)
   const [name, setName] = useState(me.display_name)
   const [major, setMajor] = useState(me.major ?? '')
   const [gradYear, setGradYear] = useState(me.grad_year ? String(me.grad_year) : '')
@@ -210,7 +211,7 @@ export default function ProfileForm({
                 className={control}
               >
                 <option value="">Choose your major</option>
-                {withSaved(MAJORS, me.major).map((option) => (
+                {withSaved(campus.majors, me.major).map((option) => (
                   <option key={option}>{option}</option>
                 ))}
               </select>
@@ -232,7 +233,7 @@ export default function ProfileForm({
           </div>
 
           <fieldset>
-            <legend className="font-bold">Did you transfer to UCI?</legend>
+            <legend className="font-bold">Did you transfer to {campus.short}?</legend>
             <div className="mt-2 flex gap-6">
               {(
                 [

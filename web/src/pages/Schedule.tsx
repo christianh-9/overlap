@@ -10,12 +10,14 @@ import {
   useSchedule,
   type Course,
 } from '../api/schedule'
+import { useMe } from '../api/me'
 import { useTerm } from '../api/term'
 import DayPicker from '../components/DayPicker'
 import { LoadError, Loading } from '../components/QueryStatus'
 import SubmitButton from '../components/SubmitButton'
 import TimeStrip, { TimeTicks } from '../components/TimeStrip'
 import Waking from '../components/Waking'
+import { campusInfo } from '../data/campuses'
 import {
   axisFor,
   DAY_LETTERS,
@@ -30,7 +32,6 @@ import {
 import { useNow } from '../lib/useNow'
 
 const MIN_GAP = 30
-const WEBSOC = 'https://www.reg.uci.edu/perl/WebSoc'
 
 function courseName(course: Course) {
   return `${course.dept} ${course.number}`
@@ -65,9 +66,10 @@ function groupMeetings(meetings: Course['meetings']) {
 
 export default function Schedule() {
   const schedule = useSchedule()
+  const me = useMe()
 
-  if (schedule.isPending) {
-    return <Loading label="Loading your schedule..." paused={schedule.isPaused} />
+  if (schedule.isPending || me.isPending) {
+    return <Loading label="Loading your schedule..." paused={schedule.isPaused || me.isPaused} />
   }
   if (schedule.isError) {
     return (
@@ -78,10 +80,21 @@ export default function Schedule() {
       />
     )
   }
-  return <ScheduleView courses={schedule.data} />
+  if (me.isError) {
+    return (
+      <LoadError title="Couldn't load your profile" error={me.error} onRetry={() => me.refetch()} />
+    )
+  }
+  return <ScheduleView courses={schedule.data} campus={campusInfo(me.data.campus)} />
 }
 
-function ScheduleView({ courses }: { courses: Course[] }) {
+function ScheduleView({
+  courses,
+  campus,
+}: {
+  courses: Course[]
+  campus: ReturnType<typeof campusInfo>
+}) {
   const queryClient = useQueryClient()
   const term = useTerm().data?.label
   const hours = useCampusHours().data
@@ -130,7 +143,7 @@ function ScheduleView({ courses }: { courses: Course[] }) {
     event.preventDefault()
     setNotice(null)
     if (!/^\d{5}$/.test(code)) {
-      setLocalError('Enter the 5-digit section code.')
+      setLocalError(`Enter the 5-digit ${campus.code}.`)
     } else if (courses.some((course) => course.course_code === code)) {
       setLocalError('That class is already in your schedule.')
     } else {
@@ -183,9 +196,9 @@ function ScheduleView({ courses }: { courses: Course[] }) {
             </SubmitButton>
           </div>
           <p id="course_code-hint" className="text-sm text-moss">
-            Section codes are listed in the{' '}
+            {campus.codes} are listed in the{' '}
             <a
-              href={WEBSOC}
+              href={campus.scheduleUrl}
               target="_blank"
               rel="noreferrer"
               className="text-ink underline underline-offset-4"
@@ -218,7 +231,7 @@ function ScheduleView({ courses }: { courses: Course[] }) {
 
         {courses.length === 0 && (
           <p className="mt-8 rounded-card border border-dashed border-moss p-5 text-moss">
-            Add your {term ? `${term} ` : ''}classes to see your free time. Section codes are the
+            Add your {term ? `${term} ` : ''}classes to see your free time. {campus.codes} are the
             5-digit numbers in the Schedule of Classes.
           </p>
         )}
