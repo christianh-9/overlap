@@ -10,6 +10,7 @@ CAMPUSES = [
         "email_domain": "uci.edu",
         "term_system": "quarter",
     },
+    {"slug": "ucr", "name": "UC Riverside", "email_domain": "ucr.edu", "term_system": "quarter"},
 ]
 
 

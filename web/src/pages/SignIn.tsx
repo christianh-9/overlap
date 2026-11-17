@@ -6,6 +6,8 @@ import { errorMessage, unwrap } from '../api/errors'
 import SubmitButton from '../components/SubmitButton'
 import Waking from '../components/Waking'
 
+const DOMAINS = ['uci.edu', 'ucr.edu']
+
 export default function SignIn() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -40,8 +42,8 @@ export default function SignIn() {
   function submitEmail(event: FormEvent) {
     event.preventDefault()
     const address = email.trim().toLowerCase()
-    if (!address.endsWith('@uci.edu')) {
-      setLocalError('Use your @uci.edu email address.')
+    if (!DOMAINS.some((domain) => address.endsWith(`@${domain}`))) {
+      setLocalError('Use your @uci.edu or @ucr.edu email address.')
       return
     }
     setLocalError(null)
@@ -94,7 +96,7 @@ export default function SignIn() {
             See who's free when you are.
           </h1>
           <p className="mt-3 text-moss lg:mt-5 lg:text-lg">
-            Add your classes, and Overlap shows other UCI students with the same gaps in their day.
+            Add your classes, and Overlap shows other students on your campus with the same gaps in their day.
           </p>
           <DayPreview />
         </section>
@@ -103,14 +105,14 @@ export default function SignIn() {
           {sentTo === null ? (
             <form onSubmit={submitEmail} noValidate className="flex flex-col gap-2">
               <label htmlFor="email" className="font-bold">
-                UCI email
+                Campus email
               </label>
               <input
                 id="email"
                 type="email"
                 inputMode="email"
                 autoComplete="email"
-                placeholder="you@uci.edu"
+                placeholder="you@uci.edu or you@ucr.edu"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 aria-invalid={error ? true : undefined}

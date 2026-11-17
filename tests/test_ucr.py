@@ -113,3 +113,16 @@ def test_each_campus_gets_its_own_lookup():
 def test_me_includes_the_campus(client, login):
     alice = login("alice@uci.edu")
     assert client.get("/me", headers=alice).json()["campus"] == {"slug": "uci", "name": "UC Irvine"}
+
+
+def test_campuses_never_see_each_other(client, login):
+    uci = login("alice@uci.edu")
+    ucr = login("bob@ucr.edu")
+    for headers, name in [(uci, "Alice"), (ucr, "Bob")]:
+        client.patch("/me", headers=headers, json={"display_name": name})
+        client.post("/schedule/courses", headers=headers, json={"course_code": "34000"})
+        client.post("/schedule/courses", headers=headers, json={"course_code": "44000"})
+
+    bob_id = client.get("/me", headers=ucr).json()["id"]
+    assert client.get("/matches?weekday=0", headers=uci).json() == []
+    assert client.get(f"/users/{bob_id}", headers=uci).status_code == 404
