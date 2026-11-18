@@ -161,6 +161,7 @@ class Wave(Base):
     recipient_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True, index=True
     )
+    note: Mapped[str | None] = mapped_column(String(140))
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
