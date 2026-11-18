@@ -3,7 +3,13 @@ import { useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { api } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
-import { useConnections, useReceivedWaves, type Connection, type Profile } from '../api/waves'
+import {
+  useConnections,
+  useReceivedWaves,
+  type Connection,
+  type Profile,
+  type ReceivedWave,
+} from '../api/waves'
 import Avatar from '../components/Avatar'
 import { LoadError, Loading } from '../components/QueryStatus'
 import SafetyMenu from '../components/SafetyMenu'
@@ -21,8 +27,8 @@ export default function Connections() {
         await api.POST('/waves/{user_id}', { params: { path: { user_id: profile.id } } }),
       ),
     onSuccess: (_, profile) => {
-      queryClient.setQueryData<Profile[]>(['waves', 'received'], (old = []) =>
-        old.filter((p) => p.id !== profile.id),
+      queryClient.setQueryData<ReceivedWave[]>(['waves', 'received'], (old = []) =>
+        old.filter((wave) => wave.profile.id !== profile.id),
       )
       // wave response has no contact
       queryClient.invalidateQueries({ queryKey: ['waves', 'connections'] })
@@ -35,8 +41,8 @@ export default function Connections() {
 
   function safetyDone(profile: Profile, message: string, removed: boolean) {
     if (removed) {
-      queryClient.setQueryData<Profile[]>(['waves', 'received'], (old = []) =>
-        old.filter((p) => p.id !== profile.id),
+      queryClient.setQueryData<ReceivedWave[]>(['waves', 'received'], (old = []) =>
+        old.filter((wave) => wave.profile.id !== profile.id),
       )
       queryClient.setQueryData<Connection[]>(['waves', 'connections'], (old = []) =>
         old.filter((c) => c.profile.id !== profile.id),
@@ -77,10 +83,16 @@ export default function Connections() {
               <Empty>No new waves. When someone waves at you from Matches, they show up here.</Empty>
             ) : (
               <ul className="flex flex-col gap-3">
-                {received.data.map((profile) => {
+                {received.data.map(({ profile, note }) => {
                   const pending = waveBack.isPending && waveBack.variables?.id === profile.id
                   return (
                     <PersonCard key={profile.id} profile={profile}>
+                      {note && (
+                        <p className="mt-3 border-l-2 border-ink pl-3 text-sm">
+                          <span className="sr-only">Note from {profile.display_name}: </span>
+                          {note}
+                        </p>
+                      )}
                       <div className="mt-4 flex justify-end">
                         <button
                           type="button"

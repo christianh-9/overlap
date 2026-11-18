@@ -202,7 +202,9 @@ function MatchList({
     },
     onSuccess: ({ mutual }, match) => {
       queryClient.setQueryData<Match[]>(['matches', day], (old) =>
-        old?.map((m) => (m.profile.id === match.profile.id ? { ...m, waved: !match.waved } : m)),
+        old?.map((m) =>
+          m.profile.id === match.profile.id ? { ...m, waved: !match.waved, note: null } : m,
+        ),
       )
       queryClient.invalidateQueries({ queryKey: ['matches'], refetchType: 'none' })
       queryClient.invalidateQueries({ queryKey: ['waves'] })
@@ -248,6 +250,7 @@ function MatchList({
             axis={axis}
             busy={busy}
             now={now}
+            day={day}
             waving={wave.isPending && wave.variables?.profile.id === match.profile.id}
             onWave={() => wave.mutate(match)}
           />
@@ -264,6 +267,7 @@ function MatchCard({
   axis,
   busy,
   now,
+  day,
   waving,
   onWave,
 }: {
@@ -273,6 +277,7 @@ function MatchCard({
   axis: Range
   busy: Range[]
   now?: number
+  day: number
   waving: boolean
   onWave: () => void
 }) {
@@ -347,6 +352,111 @@ function MatchCard({
           {match.waved ? 'Waved' : 'Wave'}
         </button>
       </div>
+
+      {match.waved && <WaveNote match={match} day={day} />}
     </li>
+  )
+}
+
+function WaveNote({ match, day }: { match: Match; day: number }) {
+  const queryClient = useQueryClient()
+  const [draft, setDraft] = useState<string | null>(null)
+  const { profile } = match
+  const fieldId = `note-${profile.id}`
+
+  const send = useMutation({
+    mutationFn: async (note: string) =>
+      unwrap(
+        await api.POST('/waves/{user_id}', {
+          params: { path: { user_id: profile.id } },
+          body: { note },
+        }),
+      ),
+    onSuccess: (_, note) => {
+      queryClient.setQueryData<Match[]>(['matches', day], (old) =>
+        old?.map((m) => (m.profile.id === profile.id ? { ...m, note: note.trim() || null } : m)),
+      )
+      queryClient.invalidateQueries({ queryKey: ['matches'], refetchType: 'none' })
+      setDraft(null)
+    },
+  })
+
+  if (draft === null) {
+    return (
+      <div className="mt-3">
+        {match.note && (
+          <p className="border-l-2 border-ink pl-3 text-sm">
+            <span className="sr-only">Your note: </span>
+            {match.note}
+          </p>
+        )}
+        <div className="mt-2 flex items-center gap-3 text-sm">
+          <button
+            type="button"
+            onClick={() => {
+              send.reset()
+              setDraft(match.note ?? '')
+            }}
+            aria-label={`${match.note ? 'Edit your note to' : 'Add a note for'} ${profile.display_name}`}
+            className="font-bold underline underline-offset-4"
+          >
+            {match.note ? 'Edit note' : 'Add a note'}
+          </button>
+          <p role="status" className="text-moss">
+            {send.isSuccess ? 'Note sent.' : ''}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault()
+        send.mutate(draft)
+      }}
+      className="mt-3 flex flex-col gap-2"
+    >
+      <label htmlFor={fieldId} className="text-sm font-bold">
+        Note to {profile.display_name}
+      </label>
+      <textarea
+        id={fieldId}
+        ref={(field) => field?.focus()}
+        maxLength={140}
+        rows={2}
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        placeholder="Free until 2, want to grab lunch?"
+        aria-describedby={`${fieldId}-hint`}
+        className="w-full rounded-card border border-rule bg-card px-3 py-2 text-sm"
+      />
+      <p id={`${fieldId}-hint`} className="flex justify-between gap-3 text-sm text-moss">
+        <span>Only {profile.display_name} sees this.</span>
+        <span>{draft.length} / 140</span>
+      </p>
+      {send.error && (
+        <p role="alert" className="text-sm text-danger">
+          {errorMessage(send.error)}
+        </p>
+      )}
+      <div className="flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => setDraft(null)}
+          className="h-10 rounded-card border border-rule px-4 text-sm font-bold"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={send.isPending}
+          className="h-10 rounded-card bg-ink px-4 text-sm font-bold text-chalk disabled:opacity-60"
+        >
+          {send.isPending ? 'Sending...' : 'Send note'}
+        </button>
+      </div>
+    </form>
   )
 }
