@@ -267,7 +267,7 @@ function ScheduleView({
                 return (
                   <li key={course.id} className="flex items-start justify-between gap-3 p-4">
                     <div className="min-w-0">
-                      <p className="font-bold">
+                      <p className="line-clamp-2 font-bold">
                         {courseName(course)}{' '}
                         <span className="font-normal text-moss">· {course.title}</span>
                       </p>
