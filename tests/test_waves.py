@@ -23,7 +23,7 @@ def test_one_way_wave_is_not_a_connection(client, login):
     assert client.get("/waves/connections", headers=alice).json() == []
 
     received = client.get("/waves/received", headers=bob).json()
-    assert [p["display_name"] for p in received] == ["Alice"]
+    assert [w["profile"]["display_name"] for w in received] == ["Alice"]
 
 
 def test_mutual_wave_shares_contact(client, login):
@@ -55,3 +55,49 @@ def test_cannot_wave_self_or_blocked(client, login):
     client.post(f"/users/{bob_id}/block", headers=alice)
     assert client.post(f"/waves/{alice_id}", headers=bob).status_code == 404
     assert client.get("/waves/connections", headers=bob).json() == []
+
+
+def test_wave_with_a_note(client, login):
+    alice, bob, _, bob_id = setup_pair(client, login)
+    client.post(f"/waves/{bob_id}", headers=alice, json={"note": "  At the SRC until 2  "})
+    assert client.get("/waves/received", headers=bob).json()[0]["note"] == "At the SRC until 2"
+
+
+def test_add_a_note_after_waving(client, login):
+    alice, bob, _, bob_id = setup_pair(client, login)
+    client.post(f"/waves/{bob_id}", headers=alice)
+    assert client.get("/waves/received", headers=bob).json()[0]["note"] is None
+
+    client.post(f"/waves/{bob_id}", headers=alice, json={"note": "Study at 2?"})
+    assert client.get("/waves/received", headers=bob).json()[0]["note"] == "Study at 2?"
+
+
+def test_blank_note_is_no_note(client, login):
+    alice, bob, _, bob_id = setup_pair(client, login)
+    client.post(f"/waves/{bob_id}", headers=alice, json={"note": "   "})
+    assert client.get("/waves/received", headers=bob).json()[0]["note"] is None
+
+
+def test_note_is_at_most_140_characters(client, login):
+    alice, _, _, bob_id = setup_pair(client, login)
+    r = client.post(f"/waves/{bob_id}", headers=alice, json={"note": "x" * 141})
+    assert r.status_code == 422
+
+
+def test_taking_back_a_wave_drops_the_note(client, login):
+    alice, bob, _, bob_id = setup_pair(client, login)
+    client.post(f"/waves/{bob_id}", headers=alice, json={"note": "Study at 2?"})
+    client.delete(f"/waves/{bob_id}", headers=alice)
+    client.post(f"/waves/{bob_id}", headers=alice)
+    assert client.get("/waves/received", headers=bob).json()[0]["note"] is None
+
+
+def test_match_card_shows_my_note(client, login):
+    alice, bob, _, bob_id = setup_pair(client, login)
+    for headers, codes in [(alice, ["34000", "44000"]), (bob, ["34000", "50000"])]:
+        for code in codes:
+            client.post("/schedule/courses", headers=headers, json={"course_code": code})
+    client.post(f"/waves/{bob_id}", headers=alice, json={"note": "Study at 2?"})
+
+    [match] = client.get("/matches?weekday=0", headers=alice).json()
+    assert (match["waved"], match["note"]) == (True, "Study at 2?")

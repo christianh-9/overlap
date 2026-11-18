@@ -588,6 +588,8 @@ export interface components {
             same_transfer_school: boolean;
             /** Waved */
             waved: boolean;
+            /** Note */
+            note: string | null;
         };
         /** MeOut */
         MeOut: {
@@ -670,6 +672,12 @@ export interface components {
             /** Bio */
             bio?: string | null;
         };
+        /** ReceivedWaveOut */
+        ReceivedWaveOut: {
+            profile: components["schemas"]["ProfileOut"];
+            /** Note */
+            note: string | null;
+        };
         /** ReportIn */
         ReportIn: {
             /**
@@ -747,6 +755,11 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** WaveIn */
+        WaveIn: {
+            /** Note */
+            note?: string | null;
         };
         /** WaveResult */
         WaveResult: {
@@ -1444,7 +1457,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["WaveIn"] | null;
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -1530,7 +1547,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProfileOut"][];
+                    "application/json": components["schemas"]["ReceivedWaveOut"][];
                 };
             };
         };
