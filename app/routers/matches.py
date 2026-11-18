@@ -94,7 +94,9 @@ def matches(
         shared[user_id] += 1
 
     users = db.scalars(select(User).where(User.id.in_(candidates))).all()
-    waved = set(db.scalars(select(Wave.recipient_id).where(Wave.sender_id == me.id)))
+    notes = dict(
+        db.execute(select(Wave.recipient_id, Wave.note).where(Wave.sender_id == me.id)).all()
+    )
     results = []
 
     for user in users:
@@ -108,7 +110,8 @@ def matches(
                 same_major=bool(me.major) and user.major == me.major,
                 same_transfer_school=bool(me.transfer_from)
                 and user.transfer_from == me.transfer_from,
-                waved=user.id in waved,
+                waved=user.id in notes,
+                note=notes.get(user.id),
             )
         )
 

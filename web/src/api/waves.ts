@@ -5,6 +5,7 @@ import type { components } from './schema'
 
 export type Profile = components['schemas']['ProfileOut']
 export type Connection = components['schemas']['ConnectionOut']
+export type ReceivedWave = components['schemas']['ReceivedWaveOut']
 
 export function useReceivedWaves({ enabled = true } = {}) {
   return useQuery({

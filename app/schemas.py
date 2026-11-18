@@ -144,6 +144,7 @@ class MatchOut(BaseModel):
     same_major: bool
     same_transfer_school: bool
     waved: bool
+    note: str | None
 
 
 class ActivityIn(BaseModel):
@@ -166,6 +167,22 @@ class ActivityOut(BaseModel):
 
 class WaveResult(BaseModel):
     mutual: bool
+
+
+class WaveIn(BaseModel):
+    note: str | None = Field(None, max_length=140)
+
+    @field_validator("note")
+    @classmethod
+    def blank_is_none(cls, value):
+        if value is None:
+            return None
+        return value.strip() or None
+
+
+class ReceivedWaveOut(BaseModel):
+    profile: ProfileOut
+    note: str | None
 
 
 class ConnectionOut(BaseModel):
