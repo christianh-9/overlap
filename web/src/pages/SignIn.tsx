@@ -99,6 +99,7 @@ export default function SignIn() {
             Add your classes, and Overlap shows other students on your campus with the same gaps in their day.
           </p>
           <DayPreview />
+          <HowItWorks className="mt-12 hidden lg:flex" />
         </section>
 
         <div className="mt-10 lg:mt-0 lg:rounded-card lg:border lg:border-rule lg:bg-card lg:p-8">
@@ -185,7 +186,33 @@ export default function SignIn() {
           </div>
         </div>
       </div>
+
+      {!sentTo && <HowItWorks className="mt-10 flex lg:hidden" />}
     </div>
+  )
+}
+
+const STEPS = [
+  'Add your classes.',
+  "See who's free when you are, any weekday.",
+  "Wave. If they wave back, you both get each other's contact.",
+]
+
+function HowItWorks({ className }: { className: string }) {
+  return (
+    <section aria-labelledby="how-heading" className={`flex-col gap-3 ${className}`}>
+      <h2 id="how-heading" className="font-bold">
+        How it works
+      </h2>
+      <ol className="flex flex-col gap-2 text-moss">
+        {STEPS.map((step, index) => (
+          <li key={step} className="flex gap-3">
+            <span className="font-mono text-ink">{index + 1}</span>
+            {step}
+          </li>
+        ))}
+      </ol>
+    </section>
   )
 }
 
