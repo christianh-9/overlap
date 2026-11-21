@@ -45,6 +45,7 @@ export default function Profile() {
             Sign out
           </button>
         </div>
+        <WaveEmails on={me.data.email_waves} />
       </Section>
 
       <Section title="Blocked people">
@@ -111,6 +112,42 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       <h2 className="mb-3 font-bold">{title}</h2>
       {children}
     </section>
+  )
+}
+
+function WaveEmails({ on }: { on: boolean }) {
+  const queryClient = useQueryClient()
+  const toggle = useMutation({
+    mutationFn: async (value: boolean) =>
+      unwrap(await api.PATCH('/me', { body: { email_waves: value } })),
+    onSuccess: (saved) => queryClient.setQueryData(['me'], saved),
+  })
+  const checked = toggle.isPending ? Boolean(toggle.variables) : on
+
+  return (
+    <div className="mt-6">
+      <label className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          checked={checked}
+          disabled={toggle.isPending}
+          onChange={(event) => toggle.mutate(event.target.checked)}
+          className="mt-0.5 size-5 shrink-0 accent-ink"
+        />
+        <span>
+          <span className="font-bold">Email me when someone waves at me or we connect</span>
+          <span className="block text-sm text-moss">At most one email a day.</span>
+        </span>
+      </label>
+      <p role="status" className="mt-2 text-sm text-moss empty:hidden">
+        {toggle.isPending ? 'Saving...' : toggle.isSuccess ? 'Saved.' : ''}
+      </p>
+      {toggle.error && (
+        <p role="alert" className="mt-2 text-sm text-danger">
+          {errorMessage(toggle.error)}
+        </p>
+      )}
+    </div>
   )
 }
 

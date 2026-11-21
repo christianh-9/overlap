@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     admin_emails: list[str] = []
     resend_api_key: str = ""
     email_from: str = "Overlap <onboarding@resend.dev>"
+    site_url: str = "http://localhost:5173"
     aws_access_key_id: str = ""
     aws_secret_access_key: str = ""
     aws_region: str = "us-east-2"

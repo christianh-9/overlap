@@ -10,6 +10,7 @@ from sqlalchemy import (
     Time,
     UniqueConstraint,
     func,
+    true,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -43,6 +44,8 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     campus: Mapped[Campus] = relationship()
     photo_key: Mapped[str | None] = mapped_column(String(64))
+    email_waves: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
+    last_wave_email_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class LoginCode(Base):

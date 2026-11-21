@@ -65,6 +65,7 @@ class MeOut(ProfileOut):
     home_city: str | None
     contact: str | None
     campus: CampusOut
+    email_waves: bool
 
 
 class ProfileUpdate(BaseModel):
@@ -76,8 +77,9 @@ class ProfileUpdate(BaseModel):
     home_city: str | None = Field(None, max_length=100)
     contact: str | None = Field(None, max_length=100)
     bio: str | None = Field(None, max_length=500)
+    email_waves: bool | None = None
 
-    @field_validator("display_name", "is_transfer", "bio")
+    @field_validator("display_name", "is_transfer", "bio", "email_waves")
     @classmethod
     def not_null(cls, value):
         if value is None:

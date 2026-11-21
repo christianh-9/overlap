@@ -14,7 +14,7 @@ from sqlalchemy import event
 
 from app.anteater import CourseNotFound, MeetingData, SectionData
 from app.db import Base, engine
-from app.email import get_mailer
+from app.email import get_mailer, get_notifier
 from app.main import app
 from app.photos import get_storage
 from app.routers.schedule import get_fetcher
@@ -51,17 +51,25 @@ def fake_fetch(term: str, code: str) -> SectionData:
 
 
 @pytest.fixture
+def sent():
+    return []
+
+
+@pytest.fixture
 def outbox():
     return []
 
 
 @pytest.fixture
-def client(outbox, storage):
+def client(outbox, storage, sent):
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     app.dependency_overrides[get_fetcher] = lambda: fake_fetch
     app.dependency_overrides[get_mailer] = lambda: lambda to, code: outbox.append((to, code))
     app.dependency_overrides[get_storage] = lambda: storage
+    app.dependency_overrides[get_notifier] = lambda: (
+        lambda to, subject, text: sent.append((to, subject, text))
+    )
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
