@@ -614,6 +614,8 @@ export interface components {
             /** Contact */
             contact: string | null;
             campus: components["schemas"]["CampusOut"];
+            /** Email Waves */
+            email_waves: boolean;
             /** Photo Url */
             readonly photo_url: string | null;
         };
@@ -671,6 +673,8 @@ export interface components {
             contact?: string | null;
             /** Bio */
             bio?: string | null;
+            /** Email Waves */
+            email_waves?: boolean | null;
         };
         /** ReceivedWaveOut */
         ReceivedWaveOut: {
