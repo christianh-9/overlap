@@ -67,6 +67,11 @@ class MeOut(ProfileOut):
     campus: CampusOut
     email_waves: bool
 
+    @computed_field
+    @property
+    def is_admin(self) -> bool:
+        return self.email in settings.admin_emails
+
 
 class ProfileUpdate(BaseModel):
     display_name: str | None = Field(None, min_length=1, max_length=50)
@@ -212,6 +217,14 @@ class ReportOut(BaseModel):
     details: str
     status: str
     created_at: datetime
+
+
+class AdminReportOut(ReportOut):
+    reported: ProfileOut | None
+    contact: str | None
+    note: str | None
+    reporter_name: str | None
+    campus: str | None
 
 
 class ResolveIn(BaseModel):

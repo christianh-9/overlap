@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from app.auth import current_user
 from app.config import settings
 from app.db import get_db
-from app.models import BannedEmail, Report, User
+from app.models import BannedEmail, Report, User, Wave
 from app.photos import Storage, get_storage
-from app.schemas import ReportOut, ResolveIn
+from app.schemas import ReportOut, ResolveIn, AdminReportOut, ProfileOut
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -18,13 +18,28 @@ def require_admin(me: User = Depends(current_user)) -> User:
     return me
 
 
-@router.get("/reports", response_model=list[ReportOut])
+def admin_view(db: Session, report: Report) -> AdminReportOut:
+    reported = db.get(User, report.reported_id) if report.reported_id else None
+    reporter = db.get(User, report.reporter_id) if report.reporter_id else None
+    wave = db.get(Wave, (reported.id, reporter.id)) if reported and reporter else None
+    return AdminReportOut(
+        **ReportOut.model_validate(report).model_dump(),
+        reported=ProfileOut.model_validate(reported) if reported else None,
+        contact=reported.contact if reported else None,
+        note=wave.note if wave else None,
+        reporter_name=reporter.display_name if reporter else None,
+        campus=reported.campus.name if reported else None,
+    )
+
+
+@router.get("/reports", response_model=list[AdminReportOut])
 def list_reports(
     status: str = Query("open"), _: User = Depends(require_admin), db: Session = Depends(get_db)
 ):
-    return db.scalars(
+    reports = db.scalars(
         select(Report).where(Report.status == status).order_by(Report.created_at)
     ).all()
+    return [admin_view(db, report) for report in reports]
 
 
 @router.post("/reports/{report_id}/resolve", response_model=ReportOut)

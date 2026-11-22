@@ -475,6 +475,37 @@ export interface components {
             /** Joined */
             joined: boolean;
         };
+        /** AdminReportOut */
+        AdminReportOut: {
+            /** Id */
+            id: number;
+            /** Reporter Id */
+            reporter_id: number | null;
+            /** Reported Id */
+            reported_id: number | null;
+            /** Reported Email */
+            reported_email: string;
+            /** Reason */
+            reason: string;
+            /** Details */
+            details: string;
+            /** Status */
+            status: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            reported: components["schemas"]["ProfileOut"] | null;
+            /** Contact */
+            contact: string | null;
+            /** Note */
+            note: string | null;
+            /** Reporter Name */
+            reporter_name: string | null;
+            /** Campus */
+            campus: string | null;
+        };
         /** Body_set_photo_me_photo_put */
         Body_set_photo_me_photo_put: {
             /** File */
@@ -618,6 +649,8 @@ export interface components {
             email_waves: boolean;
             /** Photo Url */
             readonly photo_url: string | null;
+            /** Is Admin */
+            readonly is_admin: boolean;
         };
         /** MeetingOut */
         MeetingOut: {
@@ -1573,7 +1606,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ReportOut"][];
+                    "application/json": components["schemas"]["AdminReportOut"][];
                 };
             };
             /** @description Validation Error */
