@@ -7,7 +7,7 @@ from app.config import settings
 from app.db import get_db
 from app.models import BannedEmail, Report, User, Wave
 from app.photos import Storage, get_storage
-from app.schemas import ReportOut, ResolveIn, AdminReportOut, ProfileOut
+from app.schemas import AdminReportOut, ProfileOut, ReportOut, ResolveIn
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
