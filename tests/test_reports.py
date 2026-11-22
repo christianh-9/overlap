@@ -62,3 +62,43 @@ def test_ban_removes_account_and_blocks_signup(client, login):
     assert client.get("/me", headers=bob).status_code == 401
     r = client.post("/auth/request-code", json={"email": "bob@uci.edu"})
     assert r.status_code == 403
+
+
+def test_me_says_who_is_an_admin(client, login):
+    alice, _, admin, _ = setup(client, login)
+    assert client.get("/me", headers=admin).json()["is_admin"] is True
+    assert client.get("/me", headers=alice).json()["is_admin"] is False
+
+
+def test_admin_sees_the_evidence(client, login):
+    alice, bob, admin, bob_id = setup(client, login)
+    alice_id = client.get("/me", headers=alice).json()["id"]
+    client.patch("/me", headers=alice, json={"display_name": "Alice"})
+    client.patch("/me", headers=bob, json={"display_name": "Bob", "contact": "IG @bob"})
+    client.post(f"/waves/{alice_id}", headers=bob, json={"note": "Something rude"})
+    report(client, alice, bob_id)
+
+    [r] = client.get("/admin/reports", headers=admin).json()
+    assert r["reported"]["display_name"] == "Bob"
+    assert (r["contact"], r["note"]) == ("IG @bob", "Something rude")
+    assert (r["reporter_name"], r["campus"]) == ("Alice", "UC Irvine")
+
+
+def test_deleted_account_still_listed(client, login):
+    alice, bob, admin, bob_id = setup(client, login)
+    report(client, alice, bob_id)
+    client.delete("/me", headers=bob)
+
+    [r] = client.get("/admin/reports", headers=admin).json()
+    assert r["reported"] is None
+    assert r["reported_email"] == "bob@uci.edu"
+
+
+def test_new_report_emails_admins(client, login, sent):
+    alice, _, _, bob_id = setup(client, login)
+    report(client, alice, bob_id)
+
+    [(to, subject, text)] = sent
+    assert (to, subject) == ("admin@uci.edu", "New report on Overlap")
+    assert "/admin" in text
+    assert "Kept messaging" not in text

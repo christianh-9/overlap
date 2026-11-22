@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, BackgroundTasks
 from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
 
 from app.auth import current_user
+from app.config import settings
 from app.db import get_db
+from app.email import Notifier, get_notifier, try_send
 from app.models import Block, LoginCode, Report, User
 from app.photos import MAX_BYTES, NotAnImage, Storage, get_storage, new_key, process
 from app.schemas import MeOut, ProfileOut, ProfileUpdate, ReportIn
@@ -131,7 +133,12 @@ def blocked_people(me: User = Depends(current_user), db: Session = Depends(get_d
 
 @router.post("/users/{user_id}/report", status_code=201)
 def report_user(
-    user_id: int, body: ReportIn, me: User = Depends(current_user), db: Session = Depends(get_db)
+    user_id: int,
+    body: ReportIn,
+    background: BackgroundTasks,
+    me: User = Depends(current_user),
+    db: Session = Depends(get_db),
+    send: Notifier = Depends(get_notifier),
 ):
     user = db.get(User, user_id)
     if user is None or user.id == me.id or user.campus_id != me.campus_id:
@@ -148,4 +155,7 @@ def report_user(
     if body.block and db.get(Block, (me.id, user_id)) is None:
         db.add(Block(blocker_id=me.id, blocked_id=user_id))
     db.commit()
+    text = f"A student was reported for {body.reason}. Review it: {settings.site_url}/admin"
+    for admin in settings.admin_emails:
+        background.add_task(try_send, send, admin, "New report on Overlap", text)
     return {"reported": True}
