@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Link } from 'react-router'
 import { api } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
 import { useMe, useSignOut } from '../api/me'
@@ -46,6 +47,11 @@ export default function Profile() {
           </button>
         </div>
         <WaveEmails on={me.data.email_waves} />
+        {me.data.is_admin && (
+          <Link to="/admin" className="mt-6 inline-block font-bold underline underline-offset-4">
+            Review reports
+          </Link>
+        )}
       </Section>
 
       <Section title="Blocked people">

@@ -2,18 +2,8 @@ import { useMutation } from '@tanstack/react-query'
 import { useRef, useState, type FormEvent } from 'react'
 import { api } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
-import type { components } from '../api/schema'
 import type { Profile } from '../api/waves'
-
-type Reason = components['schemas']['ReportIn']['reason']
-
-const REASONS: [Reason, string][] = [
-  ['harassment', 'Harassment'],
-  ['spam', 'Spam'],
-  ['fake_profile', 'Fake profile'],
-  ['inappropriate', 'Inappropriate content'],
-  ['other', 'Something else'],
-]
+import { REASONS, type Reason } from '../data/reasons'
 
 const button = 'h-10 rounded-card px-4 text-sm font-bold disabled:opacity-60'
 
