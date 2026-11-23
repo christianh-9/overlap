@@ -1,3 +1,4 @@
+import hmac
 from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -18,6 +19,7 @@ MAX_ATTEMPTS = 5
 
 EMAIL_LIMIT = (3, timedelta(minutes=15))
 IP_LIMIT = (10, timedelta(hours=1))
+GLOBAL_LIMIT = (200, timedelta(hours=1))
 
 
 def campus_for(email: str, db: Session) -> Campus:
@@ -53,6 +55,13 @@ def request_code(
     if ip and recent_codes(db, LoginCode.ip, ip, window) >= limit:
         raise HTTPException(429, "Too many codes requested. Try again later.")
 
+    limit, window = GLOBAL_LIMIT
+    since = datetime.now(UTC) - window
+    if db.scalar(select(func.count()).where(LoginCode.created_at >= since)) >= limit:
+        raise HTTPException(
+            429, "Lots of people are signing in right now. Try again in a few minutes."
+        )
+
     code = new_code()
     db.add(
         LoginCode(
@@ -77,6 +86,10 @@ def request_code(
 def verify(body: CodeVerify, db: Session = Depends(get_db)):
     email = body.email.lower()
     campus = campus_for(email, db)
+
+    if db.get(BannedEmail, email) is not None:
+        raise HTTPException(403, "This account has been suspended")
+
     login = db.scalar(
         select(LoginCode)
         .where(LoginCode.email == email, LoginCode.used.is_(False))
@@ -88,7 +101,7 @@ def verify(body: CodeVerify, db: Session = Depends(get_db)):
 
     if login is None or expires < datetime.now(UTC) or login.attempts >= MAX_ATTEMPTS:
         raise HTTPException(400, "Invalid or expired code")
-    if login.code_hash != hash_code(email, body.code):
+    if not hmac.compare_digest(login.code_hash, hash_code(email, body.code)):
         login.attempts += 1
         db.commit()
         raise HTTPException(400, "Invalid or expired code")

@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
 from app.auth import current_user
 from app.config import settings
 from app.db import get_db
-from app.models import BannedEmail, Report, User, Wave
+from app.models import BannedEmail, LoginCode, Report, User, Wave
 from app.photos import Storage, get_storage
 from app.schemas import AdminReportOut, ProfileOut, ReportOut, ResolveIn
 
@@ -70,6 +70,7 @@ def resolve_report(
         )
         if db.get(BannedEmail, report.reported_email) is None:
             db.add(BannedEmail(email=report.reported_email))
+        db.execute(delete(LoginCode).where(LoginCode.email == report.reported_email))
         if reported:
             old_photo = reported.photo_key
             db.delete(reported)
