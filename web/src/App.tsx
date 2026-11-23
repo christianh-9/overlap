@@ -6,6 +6,7 @@ import Admin from './pages/Admin'
 import Connections from './pages/Connections'
 import Home from './pages/Home'
 import Matches from './pages/Matches'
+import Privacy from './pages/Privacy'
 import Profile from './pages/Profile'
 import ProfileSetup from './pages/ProfileSetup'
 import Schedule from './pages/Schedule'
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="schedule" element={<Schedule />} />
           <Route path="admin" element={<Admin />} />
         </Route>
+        <Route path="privacy" element={<Privacy />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

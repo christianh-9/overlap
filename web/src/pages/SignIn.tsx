@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { useEffect, useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { api, getToken, setToken } from '../api/client'
 import { errorMessage, unwrap } from '../api/errors'
 import SubmitButton from '../components/SubmitButton'
@@ -125,6 +125,12 @@ export default function SignIn() {
               <p className="mt-2 text-sm text-moss">
                 We'll email you a 6-digit code. There's no password to remember.
               </p>
+              <Link
+                to="/privacy"
+                className="mt-2 self-start text-sm text-moss underline underline-offset-4"
+              >
+                Privacy
+              </Link>
             </form>
           ) : (
             <>

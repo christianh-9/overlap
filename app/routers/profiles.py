@@ -7,7 +7,7 @@ from app.config import settings
 from app.db import get_db
 from app.email import Notifier, get_notifier, try_send
 from app.models import Block, LoginCode, Report, User
-from app.photos import MAX_BYTES, NotAnImage, Storage, get_storage, new_key, process
+from app.photos import MAX_BYTES, NotAnImage, Storage, TooLarge, get_storage, new_key, process
 from app.schemas import MeOut, ProfileOut, ProfileUpdate, ReportIn
 
 router = APIRouter(tags=["profiles"])
@@ -66,11 +66,13 @@ def set_photo(
         raise HTTPException(503, "Photo uploads aren't set up")
     data = file.file.read(MAX_BYTES + 1)
     if len(data) > MAX_BYTES:
-        raise HTTPException(413, "Photos can be up to 5 MB")
+        raise HTTPException(413, "Photos can be up to 5 MB and 50 megapixels")
     try:
         photo = process(data)
     except NotAnImage:
         raise HTTPException(422, "That file isn't an image") from None
+    except TooLarge:
+        raise HTTPException(413, "Photos can be up to 5 MB and 50 megapixels") from None
     key = new_key()
     storage.put(key, photo)
     old = me.photo_key
@@ -143,19 +145,28 @@ def report_user(
     user = db.get(User, user_id)
     if user is None or user.id == me.id or user.campus_id != me.campus_id:
         raise HTTPException(404, "User not found")
-    db.add(
-        Report(
-            reporter_id=me.id,
-            reported_id=user.id,
-            reported_email=user.email,
-            reason=body.reason,
-            details=body.details,
+    queue_was_empty = db.scalar(select(Report.id).where(Report.status == "open").limit(1)) is None
+    duplicate = db.scalar(
+        select(Report.id).where(
+            Report.reporter_id == me.id, Report.reported_id == user.id, Report.status == "open"
         )
     )
+    if duplicate is None:
+        db.add(
+            Report(
+                reporter_id=me.id,
+                reported_id=user.id,
+                reported_email=user.email,
+                reason=body.reason,
+                details=body.details,
+            )
+        )
     if body.block and db.get(Block, (me.id, user_id)) is None:
         db.add(Block(blocker_id=me.id, blocked_id=user_id))
     db.commit()
-    text = f"A student was reported for {body.reason}. Review it: {settings.site_url}/admin"
-    for admin in settings.admin_emails:
-        background.add_task(try_send, send, admin, "New report on Overlap", text)
+
+    if duplicate is None and queue_was_empty:
+        text = f"A student was reported for {body.reason}. Review it: {settings.site_url}/admin"
+        for admin in settings.admin_emails:
+            background.add_task(try_send, send, admin, "New report on Overlap", text)
     return {"reported": True}

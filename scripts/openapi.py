@@ -1,4 +1,7 @@
 import json
+import os
+
+os.environ.setdefault("DEV_MODE", "true")
 
 from app.main import app
 

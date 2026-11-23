@@ -9,15 +9,22 @@ from app.config import settings
 
 SIZE = 256
 MAX_BYTES = 5 * 1024 * 1024
+MAX_PIXELS = 50_000_000
 
 
 class NotAnImage(Exception):
     pass
 
 
+class TooLarge(Exception):
+    pass
+
+
 def process(data: bytes) -> bytes:
     try:
         image = Image.open(BytesIO(data))
+        if image.width * image.height > MAX_PIXELS:
+            raise TooLarge
         image.load()
     except (UnidentifiedImageError, OSError):
         raise NotAnImage from None
