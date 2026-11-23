@@ -40,7 +40,7 @@ def current_user(
     try:
         payload = jwt.decode(creds.credentials, settings.jwt_secret, algorithms=["HS256"])
         user = db.get(User, int(payload["sub"]))
-    except (jwt.PyJWKError, KeyError, ValueError):
+    except (jwt.InvalidTokenError, KeyError, ValueError):
         user = None
     if user is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token")
