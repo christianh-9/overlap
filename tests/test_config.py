@@ -6,7 +6,7 @@ from app.config import Settings
 
 def test_host_database_urls_get_psycopg_driver():
     for url in ["postgres://u:p@host/db", "postgresql://u:p@host/db"]:
-        settings = Settings(database_url=url, _env_file=None)
+        settings = Settings(database_url=url, _env_file=None, dev_mode=True)
         assert settings.database_url == "postgresql+psycopg://u:p@host/db"
 
 
