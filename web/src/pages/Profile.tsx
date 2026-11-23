@@ -9,11 +9,10 @@ import Avatar from '../components/Avatar'
 import ProfileForm from '../components/ProfileForm'
 import { LoadError, Loading } from '../components/QueryStatus'
 import { campusInfo } from '../data/campuses'
+import { FEEDBACK } from '../data/links'
 
 const ANTEATER_API = 'https://docs.icssc.club/docs/developer/anteaterapi'
 const ICSSC = 'https://studentcouncil.ics.uci.edu/'
-const FEEDBACK =
-  'https://docs.google.com/forms/d/e/1FAIpQLScYjZi12NEC7pcMBzLD0Ba-A2R-lFyY3cX_jKg0a5QOHQFBQQ/viewform'
 
 export default function Profile() {
   const me = useMe()
@@ -73,6 +72,12 @@ export default function Profile() {
           <p>
             If someone makes you uncomfortable, use More on their card in Connections to block or
             report them.
+          </p>
+          <p>
+            <Link to="/privacy" className={link}>
+              How Overlap handles your data
+            </Link>
+            .
           </p>
           <p>
             Found a bug or have an idea?{' '}
